@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include <Windows.h>
 
@@ -14,8 +14,8 @@ public:
 	static const int Global_Scale = 3;
 	static const int Border_X_Offset = 6;
 	static const int Border_Y_Offset = 4;
-	static const int Level_Width = 12;  // Ширина уровня в ячейках
-	static const int Level_Height = 14;  // Высота уровня в ячейках
+	static const int Level_Width = 12;  // РЁРёСЂРёРЅР° СѓСЂРѕРІРЅСЏ РІ СЏС‡РµР№РєР°С…
+	static const int Level_Height = 14;  // Р’С‹СЃРѕС‚Р° СѓСЂРѕРІРЅСЏ РІ СЏС‡РµР№РєР°С…
 	static const int Level_X_Offset = 8;
 	static const int Level_Y_Offset = 6;
 	static const int Cell_Width = 16;

@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include <Windows.h>
 
 #include "Border.h"
 #include "Ball.h"
+#include "Platform.h"
 
 //------------------------------------------------------------------------------------------------------------
 enum EKey_Type
@@ -14,32 +15,6 @@ enum EKey_Type
 };
 //------------------------------------------------------------------------------------------------------------
 const int Timer_ID = WM_USER + 1;
-//------------------------------------------------------------------------------------------------------------
-class AsEngine;
-class AsPlatform
-{
-public:
-	AsPlatform();
-
-	void Init();
-	void Redraw_Platform(AsEngine *engine);
-	void Draw(HDC hdc, AsEngine *engine, RECT &paint_area);
-
-	int X_Pos;
-	int Width;
-	int X_Step;
-
-private:
-	int Inner_Width;
-
-	RECT Platform_Rect, Prev_Platform_Rect;
-
-	HPEN Highlight_Pen, Platform_Circle_Pen, Platform_Inner_Pen;
-	HBRUSH Platform_Circle_Brush, Platform_Inner_Brush;
-
-	static const int Height = 7;
-	static const int Circle_Size = 7;
-};
 //------------------------------------------------------------------------------------------------------------
 class AsEngine
 {
