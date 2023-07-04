@@ -21,7 +21,7 @@ void AsPlatform::Redraw_Platform(HWND hwnd)
 	Prev_Platform_Rect = Platform_Rect;
 
 	Platform_Rect.left = X_Pos * AsConfig::Global_Scale;
-	Platform_Rect.top = AsConfig::Y_Pos * AsConfig::Global_Scale;
+	Platform_Rect.top = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
 	Platform_Rect.right = Platform_Rect.left + Width * AsConfig::Global_Scale;
 	Platform_Rect.bottom = Platform_Rect.top + Height * AsConfig::Global_Scale;
 
@@ -29,18 +29,18 @@ void AsPlatform::Redraw_Platform(HWND hwnd)
 	InvalidateRect(hwnd, &Platform_Rect, FALSE);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsPlatform::Draw(HDC hdc, HPEN bg_pen, HBRUSH bg_brush, RECT &paint_area)
+void AsPlatform::Draw(HDC hdc, RECT &paint_area)
 {// Рисуем платформу
 
 	int x = X_Pos;
-	int y = AsConfig::Y_Pos;
+	int y = AsConfig::Platform_Y_Pos;
 	RECT intersection_rect;
 
 	if (! IntersectRect(&intersection_rect, &paint_area, &Platform_Rect) )
 		return;
 
-	SelectObject(hdc, bg_pen);
-	SelectObject(hdc, bg_brush);
+	SelectObject(hdc, AsConfig::BG_Pen);
+	SelectObject(hdc, AsConfig::BG_Brush);
 
 	Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
 
