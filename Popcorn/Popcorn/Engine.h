@@ -3,7 +3,7 @@
 #include <Windows.h>
 
 #include "Border.h"
-#include "Level.h"
+#include "Ball.h"
 
 //------------------------------------------------------------------------------------------------------------
 enum EKey_Type
@@ -16,31 +16,6 @@ enum EKey_Type
 const int Timer_ID = WM_USER + 1;
 //------------------------------------------------------------------------------------------------------------
 class AsEngine;
-class ALevel;
-class AsPlatform;
-class ABall
-{
-public:
-	ABall();
-
-	void Init();
-
-	void Draw(HDC hdc, RECT &paint_area, AsEngine *engine);
-	void Move(AsEngine *engine, ALevel *level, AsPlatform *platform);
-
-	HPEN Ball_Pen;
-	HBRUSH Ball_Brush;
-	double Ball_Direction;
-
-	static const int Ball_Size = 4;
-
-private:
-	int Ball_X_Pos, Ball_Y_Pos;
-	double Ball_Speed;
-
-	RECT Ball_Rect, Prev_Ball_Rect;
-};
-//------------------------------------------------------------------------------------------------------------
 class AsPlatform
 {
 public:
@@ -53,8 +28,6 @@ public:
 	int X_Pos;
 	int Width;
 	int X_Step;
-
-	static const int Y_Pos = 185;
 
 private:
 	int Inner_Width;
@@ -81,9 +54,6 @@ public:
 	HWND Hwnd;
 	HPEN BG_Pen;
 	HBRUSH BG_Brush;
-
-	static const int Max_X_Pos = ALevel::Level_X_Offset + ALevel::Cell_Width * ALevel::Level_Width;
-	static const int Max_Y_Pos = 199 - ABall::Ball_Size;
 
 private:
 	ABall Ball;
