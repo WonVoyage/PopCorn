@@ -12,7 +12,7 @@ void ABall::Init()
 	AsConfig::Create_Pen_Brush(255, 255, 255, Ball_Pen, Ball_Brush);
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Draw(HDC hdc, RECT &paint_area, HPEN bg_pen, HBRUSH bg_brush)
+void ABall::Draw(HDC hdc, RECT &paint_area)
 {
 	RECT intersection_rect;
 
@@ -20,8 +20,8 @@ void ABall::Draw(HDC hdc, RECT &paint_area, HPEN bg_pen, HBRUSH bg_brush)
 		return;
 
 	// 1. Очищаем фон
-	SelectObject(hdc, bg_pen);
-	SelectObject(hdc, bg_brush);
+	SelectObject(hdc, AsConfig::BG_Pen);
+	SelectObject(hdc, AsConfig::BG_Brush);
 
 	Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right - 1, Prev_Ball_Rect.bottom - 1);
 
@@ -36,7 +36,7 @@ void ABall::Move(HWND hwnd, ALevel *level, int platform_x_pos, int platform_widt
 {
 	int next_x_pos, next_y_pos;
 	int max_x_pos = AsConfig::Max_X_Pos - AsConfig::Ball_Size;
-	int platform_y_pos = AsConfig::Y_Pos - AsConfig::Ball_Size;
+	int platform_y_pos = AsConfig::Platform_Y_Pos - AsConfig::Ball_Size;
 
 	Prev_Ball_Rect = Ball_Rect;
 
