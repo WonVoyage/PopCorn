@@ -8,9 +8,9 @@ AHit_Checker *ABall::Hit_Checkers[] = {};
 //------------------------------------------------------------------------------------------------------------
 ABall::ABall()
 : Ball_State(EBS_Normal), Ball_Pen(0), Ball_Brush(0), Center_X_Pos(0.0), Center_Y_Pos(Start_Ball_Y_Pos), Ball_Speed(0.0),
-  Rest_Distance(0.0), Ball_Direction(0), Ball_Rect{}, Prev_Ball_Rect{}
+  Rest_Distance(0.0), Ball_Direction(0), Testing_Is_Active(false), Test_Iteration(0), Ball_Rect{}, Prev_Ball_Rect{}
 {
-	Set_State(EBS_Normal, 0);
+	//Set_State(EBS_Normal, 0);
 }
 //------------------------------------------------------------------------------------------------------------
 void ABall::Init()
@@ -31,6 +31,9 @@ void ABall::Draw(HDC hdc, RECT &paint_area)
 		Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right - 1, Prev_Ball_Rect.bottom - 1);
 	}
 
+	if (Ball_State == EBS_Lost)
+		return;
+
 	// 2. Рисуем шарик
 	if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect) )
 	{
@@ -46,7 +49,6 @@ void ABall::Move()
 	int i;
 	bool got_hit;
 	double next_x_pos, next_y_pos;
-	int platform_y_pos = AsConfig::Platform_Y_Pos - AsConfig::Ball_Size;
 	double step_size = 1.0 / AsConfig::Global_Scale;
 
 	if (Ball_State != EBS_Normal)
@@ -73,10 +75,39 @@ void ABall::Move()
 
 			Center_X_Pos = next_x_pos;
 			Center_Y_Pos = next_y_pos;
+
+			if (Testing_Is_Active)
+				Rest_Test_Distance -= step_size;
 		}
 	}
 
 	Redraw_Ball();
+}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Set_For_Test()
+{
+	Testing_Is_Active = true;
+	Rest_Test_Distance = 30.0;
+
+	Set_State(EBS_Normal, 90 + Test_Iteration, 90);
+	Ball_Direction = M_PI - M_PI_4;
+
+	++Test_Iteration;
+}
+//------------------------------------------------------------------------------------------------------------
+bool ABall::Is_Test_Finished()
+{
+	if (Testing_Is_Active)
+	{
+		if (Rest_Test_Distance <= 0.0)
+		{
+			Testing_Is_Active = false;
+			Set_State(EBS_Lost, 0);
+			return true;
+		}
+	}
+
+	return false;
 }
 //------------------------------------------------------------------------------------------------------------
 EBall_State ABall::Get_State()
@@ -84,16 +115,16 @@ EBall_State ABall::Get_State()
 	return Ball_State;
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Set_State(EBall_State new_state, double x_pos)
+void ABall::Set_State(EBall_State new_state, double x_pos, double y_pos)
 {
 	switch (new_state)
 	{
 	case EBS_Normal:
 		Center_X_Pos = x_pos;
-		Center_Y_Pos = Start_Ball_Y_Pos;
+		Center_Y_Pos = y_pos;
 		Ball_Speed = 3.0;
 		Rest_Distance = 0.0;
-		Ball_Direction = M_PI - M_PI_4;
+		Ball_Direction = M_PI_4;
 		Redraw_Ball();
 		break;
 
@@ -105,15 +136,41 @@ void ABall::Set_State(EBall_State new_state, double x_pos)
 
 	case EBS_On_Platform:
 		Center_X_Pos = x_pos;
-		Center_Y_Pos = Start_Ball_Y_Pos;
+		Center_Y_Pos = y_pos;
 		Ball_Speed = 0.0;
 		Rest_Distance = 0.0;
-		Ball_Direction = M_PI - M_PI_4;
+		Ball_Direction = M_PI_4;
 		Redraw_Ball();
 		break;
 	}
 
 	Ball_State = new_state;
+}
+//------------------------------------------------------------------------------------------------------------
+double ABall::Get_Direction()
+{
+	return Ball_Direction;
+}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Set_Direction(double new_direction)
+{
+	const double pi_2 = 2.0 * M_PI;
+
+	while (new_direction > pi_2)
+		new_direction -= pi_2;
+
+	while (new_direction < 0.0)
+		new_direction += pi_2;
+
+	Ball_Direction = new_direction;
+}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Reflect(bool from_horizontal)
+{
+	if (from_horizontal)
+		Set_Direction(-Ball_Direction);
+	else
+		Set_Direction(M_PI - Ball_Direction);
 }
 //------------------------------------------------------------------------------------------------------------
 void ABall::Add_Hit_Checker(AHit_Checker *hit_checker)
