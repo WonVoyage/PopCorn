@@ -23,6 +23,8 @@ void AsEngine::Init_Engine(HWND hwnd)
 	ABall::Add_Hit_Checker(&Level);
 	ABall::Add_Hit_Checker(&Platform);
 
+	Level.Set_Current_Level(ALevel::Level_01);
+
 	Ball.Set_State(EBS_Normal, Platform.X_Pos + Platform.Width / 2);
 
 	Platform.Set_State(EPS_Normal);
@@ -45,9 +47,9 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 130, EBT_Red, ELT_O, i);
 	//}
 
-	Ball.Draw(hdc, paint_area);
 	Border.Draw(hdc, paint_area);
 	Platform.Draw(hdc, paint_area);
+	Ball.Draw(hdc, paint_area);
 }
 //------------------------------------------------------------------------------------------------------------
 int AsEngine::On_Key_Down(EKey_Type key_type)
@@ -92,6 +94,12 @@ int AsEngine::On_Timer()
 
 	switch (Game_State)
 	{
+	case EGS_Test_Ball:
+		Ball.Set_For_Test();
+		Game_State = EGS_Play_Level;
+		break;
+
+
 	case EGS_Play_Level:
 		Ball.Move();
 
@@ -100,6 +108,9 @@ int AsEngine::On_Timer()
 			Game_State = EGS_Lost_Ball;
 			Platform.Set_State(EPS_Meltdown);
 		}
+
+		if (Ball.Is_Test_Finished() )
+			Game_State = EGS_Test_Ball;
 		break;
 
 
