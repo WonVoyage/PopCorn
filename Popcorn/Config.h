@@ -41,6 +41,7 @@ public:
 	static const AColor Advertisement_Blue_Table, Advertisement_Red_Table;
 	static HWND Hwnd;
 
+	static const double D_Global_Scale;
 	static const double Moving_Step_Size;
 	static const double Start_Ball_Y_Pos;
 
@@ -61,7 +62,7 @@ public:
 	static const int FPS = 20;
 	static const int Max_Active_Bricks_Count = 10;
 	static const int Hits_Per_Letter = 1;  // Вероятность выбить букву = 1.0 / Hits_Per_Letter
-	static const int Max_Falling_Letters_Count = 10;
-	static const int Max_Balls_Count = 10;
+	static const int Max_Falling_Letters_Count = 40;
+	static const int Max_Balls_Count = 40;
 };
 //------------------------------------------------------------------------------------------------------------
