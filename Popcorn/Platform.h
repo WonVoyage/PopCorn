@@ -20,13 +20,17 @@ enum EPlatform_Moving_State
 	EPMS_Moving_Right
 };
 //------------------------------------------------------------------------------------------------------------
-class AsPlatform: public AHit_Checker
+class AsPlatform: public AHit_Checker, public AMover
 {
 public:
 	~AsPlatform();
 	AsPlatform();
 
 	virtual bool Check_Hit(double next_x_pos, double next_y_pos, ABall *ball);
+	virtual void Begin_Movement();
+	virtual void Finish_Movement();
+	virtual void Advance(double max_speed);
+	virtual double Get_Speed();
 
 	void Act();
 	EPlatform_State Get_State();
@@ -35,11 +39,9 @@ public:
 	void Draw(HDC hdc, RECT &paint_area);
 	void Move(bool to_left, bool key_down);
 	bool Hit_By(AFalling_Letter *falling_letter);
-	void Advance(double max_speed);
 	double Get_Middle_Pos();
 
 	int Width;
-	double Speed;
 	double X_Pos;
 
 private:
@@ -57,6 +59,7 @@ private:
 	EPlatform_Moving_State Platform_Moving_State;
 	int Inner_Width;
 	int Rolling_Step;
+	double Speed;
 
 	int Normal_Platform_Image_Width, Normal_Platform_Image_Height;
 	int *Normal_Platform_Image;  // Пиксели изображения платформы на фоне
@@ -76,6 +79,6 @@ private:
 	static const int Max_Rolling_Step = 16;
 	static const int Roll_In_Platform_End_X_Pos = 99;
 	static const int Rolling_Platform_Speed = 3;
-	static const int X_Step = AsConfig::Global_Scale * 2;
+	static const int X_Step = 6;
 };
 //------------------------------------------------------------------------------------------------------------
