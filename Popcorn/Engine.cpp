@@ -35,7 +35,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 
 	//Ball.Set_State(EBS_Normal, Platform.X_Pos + Platform.Width / 2);
 	//Platform.Set_State(EPS_Normal);
-	//Platform.Set_State(EPS_Glue_Init);
+	//Platform.Set_State(EPlatform_State::Expanding);
 
 	Platform.Redraw_Platform();
 
@@ -249,7 +249,9 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
 		Platform.Set_State(EPlatform_State::Glue);
 		break;
 
-	//case ELT_W:  // "Шире"
+	case ELT_W:  // "Шире"
+		Platform.Set_State(EPlatform_State::Expanding);
+		break;
 
 	case ELT_T:  // "Три"
 		Platform.Set_State(EPlatform_Substate_Regular::Normal);
