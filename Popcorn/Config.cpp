@@ -81,6 +81,7 @@ const double AsConfig::Moving_Step_Size = 1.0 / AsConfig::Global_Scale;
 const double AsConfig::Start_Ball_Y_Pos = 184.0;
 const double AsConfig::Ball_Acceleration = 1.001;
 const double AsConfig::Normal_Ball_Speed = 3.0;
+const double AsConfig::Min_Ball_Angle = M_PI / 8.0;
 //------------------------------------------------------------------------------------------------------------
 int AsConfig::Rand(int range)
 {// Вычисляет псевдослучайное число в диапазоне [0, .. range - 1]
@@ -93,6 +94,11 @@ void AsConfig::Round_Rect(HDC hdc, RECT &rect, int corner_radius)
 	int radius = corner_radius * AsConfig::Global_Scale;
 
 	RoundRect(hdc, rect.left, rect.top, rect.right - 1, rect.bottom - 1, radius, radius);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsConfig::Invalidate_Rect(RECT &rect)
+{
+	InvalidateRect(Hwnd, &rect, FALSE);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsConfig::Throw()

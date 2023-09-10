@@ -32,6 +32,7 @@ class AsConfig
 public:
 	static int Rand(int range);
 	static void Round_Rect(HDC hdc, RECT &rect, int corner_radius = 2);
+	static void Invalidate_Rect(RECT &rect);
 	static void Throw();
 
 	static bool Level_Has_Floor;
@@ -46,6 +47,7 @@ public:
 	static const double Start_Ball_Y_Pos;
 	static const double Ball_Acceleration;
 	static const double Normal_Ball_Speed;
+	static const double Min_Ball_Angle;
 
 	static const int Global_Scale = 3;
 	static const int Border_X_Offset = 6;

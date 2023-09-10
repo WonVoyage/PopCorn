@@ -13,9 +13,16 @@ enum EPlatform_State
 	EPS_Meltdown,
 	EPS_Roll_In,
 	EPS_Expand_Roll_In,
-	EPS_Glue_Init,
-	EPS_Glue,
-	EPS_Glue_Finalize
+	EPS_Glue
+};
+//------------------------------------------------------------------------------------------------------------
+enum EPlatform_Substate_Glue
+{
+	EPSG_Unknown,
+
+	EPSG_Init,
+	EPSG_Active,
+	EPSG_Finalize
 };
 //------------------------------------------------------------------------------------------------------------
 enum EPlatform_Moving_State
@@ -69,6 +76,7 @@ private:
 	void Get_Normal_Platform_Image(HDC hdc);
 
 	EPlatform_State Platform_State;
+	EPlatform_Substate_Glue Platform_Substate_Glue;
 	EPlatform_Moving_State Platform_Moving_State;
 	bool Left_Key_Down, Right_Key_Down;
 	int Inner_Width;
@@ -88,7 +96,7 @@ private:
 
 	AColor Highlight_Color, Platform_Circle_Color, Platform_Inner_Color;
 
-	static const double Max_Glue_Spot_Height_Ratio, Min_Glue_Spot_Height_Ratio;
+	static const double Max_Glue_Spot_Height_Ratio, Min_Glue_Spot_Height_Ratio, Glue_Spot_Height_Ratio_Step;
 	static const int Height = 7;
 	static const int Circle_Size = 7;
 	static const int Normal_Platform_Inner_Width = Normal_Width - Circle_Size;

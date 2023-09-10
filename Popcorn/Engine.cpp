@@ -224,15 +224,17 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
 	switch (falling_letter->Letter_Type)
 	{
 	case ELT_O:  // "Отмена"
-		Platform.Set_State(EPS_Glue_Finalize);
+		Platform.Set_State(EPS_Normal);
 		break;  //!!! Пока отменяется только клей!
 
 	case ELT_I:  // "Инверсия"
 		Ball_Set.Inverse_Balls();
+		Platform.Set_State(EPS_Normal);
 		break;
 
 	case ELT_C:  // "Скорость"
 		Ball_Set.Reset_Speed();
+		Platform.Set_State(EPS_Normal);
 		break;
 
 	//case ELT_M:  // "Монстры"
@@ -240,15 +242,17 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
 	case ELT_G:  // "Жизнь"
 		if (Life_Count < AsConfig::Max_Life_Count)
 			++Life_Count;  //!!! Отобразить на индикаторе!
+		Platform.Set_State(EPS_Normal);
 		break;
 
 	case ELT_K:  // "Клей"
-		Platform.Set_State(EPS_Glue_Init);
+		Platform.Set_State(EPS_Glue);
 		break;
 
 	//case ELT_W:  // "Шире"
 
 	case ELT_T:  // "Три"
+		Platform.Set_State(EPS_Normal);
 		Ball_Set.Triple_Balls();
 		break;
 
@@ -258,6 +262,7 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
 		AsConfig::Level_Has_Floor = true;
 		Border.Redraw_Floor();
 		//!!! Отобразить на индикаторе!
+		Platform.Set_State(EPS_Normal);
 		break;
 
 	//case ELT_Plus:  // Переход на следующий уровень
