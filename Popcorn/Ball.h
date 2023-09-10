@@ -74,6 +74,10 @@ public:
 	bool Is_Moving_Up();
 	bool Is_Moving_Left();
 	void Set_On_Parachute(int brick_x, int brick_y);
+	void Forced_Advance(double direction, double speed, double max_speed);
+	void Release();
+
+	int Release_Timer_Tick;  // Значение счётчика времени, после которого надо отпустить прикленненый мячик
 
 	static void Add_Hit_Checker(AHit_Checker *hit_checker);
 
@@ -87,8 +91,8 @@ private:
 
 	EBall_State Ball_State, Prev_Ball_State;
 	//double Rest_Distance;
-	double Ball_Direction;
-	double Ball_Speed;
+	double Ball_Direction, Prev_Ball_Direction;
+	double Ball_Speed, Prev_Ball_Speed;
 
 	bool Testing_Is_Active;
 	int Test_Iteration;
@@ -100,6 +104,7 @@ private:
 	RECT Parachute_Rect, Prev_Parachute_Rect;
 
 	static const int Parachute_Size = 15;
+	static const int On_Platform_Timeout = 10 * AsConfig::FPS;  // Время нахождения на платформе
 	static int Hit_Checkers_Count;
 	static AHit_Checker *Hit_Checkers[3];
 };
