@@ -234,7 +234,13 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
 		break;
 
 	//case ELT_L:  // "Лазер"
-	//case ELT_P:  // "Пол"
+
+	case ELT_P:  // "Пол"
+		AsConfig::Level_Has_Floor = true;
+		Border.Redraw_Floor();
+		//!!! Отобразить на индикаторе!
+		break;
+
 	//case ELT_Plus:  // Переход на следующий уровень
 	default:
 		AsConfig::Throw();
