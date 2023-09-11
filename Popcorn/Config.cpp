@@ -26,38 +26,52 @@ const double AsConfig::Ball_Acceleration = 1.001;
 const double AsConfig::Normal_Ball_Speed = 3.0;
 const double AsConfig::Min_Ball_Angle = M_PI / 8.0;
 //------------------------------------------------------------------------------------------------------------
-int AsConfig::Rand(int range)
+void AsConfig::Throw()
+{
+	throw 13;
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+// AsTools
+//------------------------------------------------------------------------------------------------------------
+int AsTools::Rand(int range)
 {// Вычисляет псевдослучайное число в диапазоне [0, .. range - 1]
 
 	return rand() * range / RAND_MAX;
 }
 //------------------------------------------------------------------------------------------------------------
-void AsConfig::Round_Rect(HDC hdc, RECT &rect, int corner_radius)
+void AsTools::Round_Rect(HDC hdc, RECT &rect, int corner_radius)
 {
 	int radius = corner_radius * AsConfig::Global_Scale;
 
 	RoundRect(hdc, rect.left, rect.top, rect.right - 1, rect.bottom - 1, radius, radius);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsConfig::Rect(HDC hdc, RECT &rect, const AColor &color)
+void AsTools::Rect(HDC hdc, RECT &rect, const AColor &color)
 {
 	color.Select(hdc);
 	Rectangle(hdc, rect.left, rect.top, rect.right - 1, rect.bottom - 1);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsConfig::Rect(HDC hdc, int x, int y, int width, int height, const AColor &color)
+void AsTools::Rect(HDC hdc, int x, int y, int width, int height, const AColor &color)
+{
+	const int scale = AsConfig::Global_Scale;
+
+	color.Select(hdc);
+	Rectangle(hdc, x * scale, y * scale, (x + width) * scale - 1, (y + height) * scale - 1);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsTools::Ellipse(HDC hdc, RECT &rect, const AColor &color)
 {
 	color.Select(hdc);
-	Rectangle(hdc, x * Global_Scale, y * Global_Scale, (x + width) * Global_Scale - 1, (y + height) * Global_Scale - 1);
+	::Ellipse(hdc, rect.left, rect.top, rect.right - 1, rect.bottom - 1);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsConfig::Invalidate_Rect(RECT &rect)
+void AsTools::Invalidate_Rect(RECT &rect)
 {
-	InvalidateRect(Hwnd, &rect, FALSE);
-}
-//------------------------------------------------------------------------------------------------------------
-void AsConfig::Throw()
-{
-	throw 13;
+	InvalidateRect(AsConfig::Hwnd, &rect, FALSE);
 }
 //------------------------------------------------------------------------------------------------------------
