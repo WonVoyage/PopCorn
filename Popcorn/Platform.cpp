@@ -5,7 +5,8 @@
 AsPlatform_State::AsPlatform_State()
 : Current_State(EPlatform_State::Regular), Next_State(EPlatform_State::Unknown), Regular(EPlatform_Substate_Regular::Missing),
   Meltdown(EPlatform_Substate_Meltdown::Unknown), Rolling(EPlatform_Substate_Rolling::Unknown),
-  Glue(EPlatform_Substate_Glue::Unknown), Expanding(EPlatform_Substate_Expanding::Unknown), Moving(EPlatform_Moving_State::Stop)
+  Glue(EPlatform_Substate_Glue::Unknown), Expanding(EPlatform_Substate_Expanding::Unknown),
+  Laser(EPlatform_Substate_Laser::Unknown), Moving(EPlatform_Moving_State::Stop)
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -45,6 +46,10 @@ void AsPlatform_State::Set_Next_State(EPlatform_State next_state)
 		Expanding = EPlatform_Substate_Expanding::Finalize;
 		break;
 
+	case EPlatform_State::Laser:
+		Laser = EPlatform_Substate_Laser::Finalize;
+		break;
+
 	default:
 		AsConfig::Throw();
 	}
@@ -76,11 +81,12 @@ AsPlatform::~AsPlatform()
 //------------------------------------------------------------------------------------------------------------
 AsPlatform::AsPlatform()
 : X_Pos(AsConfig::Border_X_Offset), Left_Key_Down(false),
-  Right_Key_Down(false), Inner_Width(Normal_Platform_Inner_Width), Rolling_Step(0), Last_Redraw_Timer_Tick(0), Speed(0.0),
-  Glue_Spot_Height_Ratio(0.0), Expanding_Platform_Width(0.0), Ball_Set(0), Normal_Platform_Image_Width(0),
-  Normal_Platform_Image_Height(0), Normal_Platform_Image(0),
+  Right_Key_Down(false), Inner_Width(Normal_Platform_Inner_Width), Rolling_Step(0), Laser_Transformation_Step(0),
+  Last_Redraw_Timer_Tick(0), Speed(0.0), Glue_Spot_Height_Ratio(0.0), Expanding_Platform_Width(0.0), Ball_Set(0),
+  Normal_Platform_Image_Width(0), Normal_Platform_Image_Height(0), Normal_Platform_Image(0),
   Platform_Rect{}, Prev_Platform_Rect{}, Highlight_Color(255, 255, 255), Platform_Circle_Color(151, 0, 0),
-  Platform_Inner_Color(0, 128, 192), Truss_Color(Platform_Inner_Color, AsConfig::Global_Scale)
+  Platform_Inner_Color(0, 128, 192), Truss_Color(Platform_Inner_Color, AsConfig::Global_Scale),
+  Gun_Color(Highlight_Color, AsConfig::Global_Scale)
 {
 	X_Pos = (AsConfig::Max_X_Pos - Normal_Width) / 2;
 }
@@ -203,6 +209,10 @@ void AsPlatform::Act()
 	case EPlatform_State::Expanding:
 		Act_For_Expanding_State();
 		break;
+
+	case EPlatform_State::Laser:
+		Act_For_Laser_State();
+		break;
 	}
 }
 //------------------------------------------------------------------------------------------------------------
@@ -225,6 +235,7 @@ void AsPlatform::Clear(HDC hdc, RECT &paint_area)
 	case EPlatform_State::Rolling:
 	case EPlatform_State::Glue:
 	case EPlatform_State::Expanding:
+	case EPlatform_State::Laser:
 		// Очищаем фоном прежнее место
 		AsConfig::BG_Color.Select(hdc);
 		Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
@@ -261,6 +272,10 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area)
 
 	case EPlatform_State::Expanding:
 		Draw_Expanding_State(hdc, paint_area);
+		break;
+
+	case EPlatform_State::Laser:
+		Draw_Laser_State(hdc, paint_area);
 		break;
 	}
 }
@@ -351,6 +366,23 @@ void AsPlatform::Set_State(EPlatform_State new_state)
 			Expanding_Platform_Width = Min_Expanding_Platform_Width;
 		}
 		break;
+
+
+	case EPlatform_State::Laser:
+		if (Platform_State != EPlatform_State::Regular)
+		{
+			Platform_State.Set_Next_State(new_state);
+			return;
+		}
+
+		if (Platform_State.Laser == EPlatform_Substate_Laser::Finalize)
+			return;
+		else
+		{
+			Platform_State.Laser = EPlatform_Substate_Laser::Init;
+			Laser_Transformation_Step = 0;
+		}
+		break;
 	}
 
 	Platform_State = new_state;
@@ -379,6 +411,15 @@ void AsPlatform::Set_State(EPlatform_Substate_Regular new_regular_state)
 				Set_Next_Or_Regular_State(new_regular_state);  // Финализация состояния закончилась
 			else
 				Platform_State.Expanding = EPlatform_Substate_Expanding::Finalize;  // Запускаем финализацию состояния
+
+			return;
+
+
+		case EPlatform_State::Laser:
+			if (Platform_State.Laser == EPlatform_Substate_Laser::Unknown)
+				Set_Next_Or_Regular_State(new_regular_state);  // Финализация состояния закончилась
+			else
+				Platform_State.Laser = EPlatform_Substate_Laser::Finalize;  // Запускаем финализацию состояния
 
 			return;
 		}
@@ -422,7 +463,7 @@ void AsPlatform::Redraw_Platform()
 void AsPlatform::Move(bool to_left, bool key_down)
 {
 	if (! (Has_State(EPlatform_Substate_Regular::Normal) || Platform_State == EPlatform_State::Glue
-		|| Platform_State == EPlatform_State::Expanding) )
+		|| Platform_State == EPlatform_State::Expanding|| Platform_State == EPlatform_State::Laser) )
 		return;
 
 	if (to_left)
@@ -467,6 +508,8 @@ void AsPlatform::On_Space_Key(bool key_down)
 	else
 		if (Platform_State == EPlatform_State::Glue)
 			Ball_Set->Release_Next_Ball();
+		else if (Platform_State == EPlatform_State::Laser)
+			AsConfig::Throw();  //!!! Надо сделать!
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsPlatform::Hit_By(AFalling_Letter *falling_letter)
@@ -514,7 +557,7 @@ void AsPlatform::Act_For_Rolling_State()
 
 		if (X_Pos <= Roll_In_Platform_End_X_Pos)
 		{
-			X_Pos += Rolling_Platform_Speed;
+			X_Pos = Roll_In_Platform_End_X_Pos;
 			Platform_State.Rolling = EPlatform_Substate_Rolling::Expand_Roll_In;
 			Inner_Width = 1;
 		}
@@ -612,6 +655,42 @@ void AsPlatform::Act_For_Expanding_State()
 		else
 		{
 			Platform_State.Expanding = EPlatform_Substate_Expanding::Unknown;
+			Set_State(EPlatform_Substate_Regular::Normal);
+		}
+
+		Redraw_Platform();
+		break;
+
+
+	default:
+		AsConfig::Throw();
+	}
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Act_For_Laser_State()
+{
+	switch (Platform_State.Laser)
+	{
+	case EPlatform_Substate_Laser::Init:
+		if (Laser_Transformation_Step < Max_Laser_Transformation_Step)
+			++Laser_Transformation_Step;
+		else
+			Platform_State.Laser = EPlatform_Substate_Laser::Active;
+
+		Redraw_Platform();
+		break;
+
+
+	case EPlatform_Substate_Laser::Active:
+		break;
+
+
+	case EPlatform_Substate_Laser::Finalize:
+		if (Laser_Transformation_Step > 0)
+			--Laser_Transformation_Step;
+		else
+		{
+			Platform_State.Laser = EPlatform_Substate_Laser::Unknown;
 			Set_State(EPlatform_Substate_Regular::Normal);
 		}
 
@@ -943,11 +1022,11 @@ void AsPlatform::Draw_Expanding_Truss(HDC hdc, RECT &inner_rect, bool is_left)
 	int truss_x;
 	int truss_top_y, truss_low_y;
 	int truss_x_offset;
-	double extansion_ratio;  // [ 1.0 .. 0.0 ]
+	double extension_ratio;  // [ 1.0 .. 0.0 ]
 	const int scale = AsConfig::Global_Scale;
 
-	extansion_ratio = (Max_Expanding_Platform_Width - Expanding_Platform_Width) / (Max_Expanding_Platform_Width - Min_Expanding_Platform_Width);
-	truss_x_offset = (int)(6.0 * extansion_ratio * AsConfig::D_Global_Scale);
+	extension_ratio = (Max_Expanding_Platform_Width - Expanding_Platform_Width) / (Max_Expanding_Platform_Width - Min_Expanding_Platform_Width);
+	truss_x_offset = (int)(6.0 * extension_ratio * AsConfig::D_Global_Scale);
 
 	truss_x = inner_rect.left + 1;
 
@@ -970,6 +1049,218 @@ void AsPlatform::Draw_Expanding_Truss(HDC hdc, RECT &inner_rect, bool is_left)
 	MoveToEx(hdc, truss_x, truss_low_y, 0);
 	LineTo(hdc, truss_x - 4 * scale - 1, truss_top_y);
 	LineTo(hdc, truss_x - 8 * scale, truss_low_y);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Laser_State(HDC hdc, RECT &paint_area)
+{// Рисуем лазерную платформу
+
+	HRGN region;
+
+	region = CreateRectRgnIndirect(&Platform_Rect);
+	SelectClipRgn(hdc, region);
+
+	// 1. Левое крыло
+	Draw_Laser_Wing(hdc, true);
+
+	// 2. Правое крыло
+	Draw_Laser_Wing(hdc, false);
+
+
+	// 3. Центральная часть
+	// 3.0. Нормальная средняя часть
+	Draw_Laser_Inner_Part(hdc);
+
+	// 3.1. Левая нога
+	Draw_Laser_Leg(hdc, true);
+
+	// 3.2. Правая нога
+	Draw_Laser_Leg(hdc, false);
+
+
+	// 3.3. Кабина
+	Draw_Laser_Cabin(hdc);
+
+	SelectClipRgn(hdc, 0);
+	DeleteObject(region);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Laser_Wing(HDC hdc, bool is_left)
+{// Рисуем крыло лазерной платформы
+
+	double x, y;
+	int x_offset;
+	double height;
+	int half_max_step = Max_Laser_Transformation_Step / 2;
+	double ratio = (double)Laser_Transformation_Step / (double)Max_Laser_Transformation_Step;
+	const int scale = AsConfig::Global_Scale;
+	const double d_scale = AsConfig::D_Global_Scale;
+
+	y = AsConfig::Platform_Y_Pos;
+	x = X_Pos;
+
+	if (! is_left)
+		x += Normal_Width - Circle_Size;
+
+	// 1. Само крыло
+//AsConfig::BG_Color.Select(hdc);
+	Platform_Circle_Color.Select(hdc);
+
+	Draw_Expanding_Figure(hdc, EFigure_Type::Ellipse, x, y, 7, 7, ratio, x, y + 1, 7, 12);
+
+	// 2. Перемычка
+	// Позиция: (3 : 6) -> (5 : 2)
+	// Размер: 1 x 1 -> 6 x 5
+	if (is_left)
+		x_offset = 5;
+	else
+		x_offset = -4;
+
+	Draw_Expanding_Figure(hdc, EFigure_Type::Rectangle, x + 3, y + 6, 1, 1, ratio, x + x_offset, y + 2, 6, 5);
+
+
+	// 3. Пушка
+	if (Laser_Transformation_Step >= half_max_step)
+	{
+		ratio = (double)(Laser_Transformation_Step - half_max_step) / (double)half_max_step;
+
+		Gun_Color.Select(hdc);
+
+		if (is_left)
+			x = X_Pos + 3.0;
+		else
+			x = X_Pos + (Normal_Width - 4);
+
+		height = 3.0 * (1.0 - ratio) * d_scale;
+
+		MoveToEx(hdc, (int)(x * d_scale + 1.0), (int)(y * d_scale + 3.0 * d_scale + 1.0), 0);
+		LineTo(hdc, (int)(x * d_scale + 1.0), (int)(y * d_scale + height + 1.0) );
+
+		// 4. Хвост
+		Draw_Expanding_Figure(hdc, EFigure_Type::Ellipse, x + 1, y + 5, 0, 0, ratio, x - 1, y + 5 + 1.0 / d_scale, 3, 6);
+	}
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Laser_Inner_Part(HDC hdc)
+{// Рисуем уменьшающуюся часть обычной платформы
+
+	double x, y;
+	double ratio = (double)Laser_Transformation_Step / (double)Max_Laser_Transformation_Step;
+
+	// Размер: 20 x 5 --> 8 x 1
+	x = X_Pos;
+	y = AsConfig::Platform_Y_Pos;
+
+	Platform_Inner_Color.Select(hdc);
+	Draw_Expanding_Figure(hdc, EFigure_Type::Round_Rect_3x, x + 4, y + 1, 20, 5, ratio, x + 10, y + 3, 8, 1);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Laser_Leg(HDC hdc, bool is_left)
+{// Рисуем "ногу" лазерной платформы
+
+	double x, y;
+	double x_scale;
+	//const int scale = AsConfig::Global_Scale;
+	const double d_scale = AsConfig::D_Global_Scale;
+	double ratio = (double)Laser_Transformation_Step / (double)Max_Laser_Transformation_Step;
+
+	Platform_Inner_Color.Select(hdc);
+
+	if (is_left)
+	{
+		x = (X_Pos + 6.0) * d_scale;
+		x_scale = d_scale;
+	}
+	else
+	{
+		x = X_Pos * d_scale + (Normal_Width - 6) * d_scale - 1.0;
+		x_scale = -d_scale;
+	}
+
+	y = (double)(AsConfig::Platform_Y_Pos + 3) * d_scale;
+
+	POINT left_leg_points[7] =
+	{
+		{ (int)x, (int)y }, { (int)(x + 2.0 * x_scale), (int)(y - 2 * d_scale) },
+		{ (int)(x + 4 * x_scale), (int)(y - 2 * d_scale) }, { (int)(x + 4 * x_scale), (int)y },
+		{ (int)(x + 2 * x_scale), (int)(y + 2 * d_scale) }, { (int)(x + 2 * x_scale), (int)(y + (2.0 + 2.0 * ratio) * d_scale) },
+		{ (int)x, (int)(y + 4.0 * ratio * d_scale) } 
+	};
+
+	Polygon(hdc, left_leg_points, 7);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Laser_Cabin(HDC hdc)
+{// Рисуем кабину лазерной платформы
+
+	double x, y;
+	const int scale = AsConfig::Global_Scale;
+	double one_pixel = 1.0 / AsConfig::D_Global_Scale;
+	double ratio = (double)Laser_Transformation_Step / (double)Max_Laser_Transformation_Step;
+
+	x = X_Pos;
+	y = AsConfig::Platform_Y_Pos;
+
+	// 1. Внешняя часть
+	// Размер: 2 x 1 --> 10 x 8
+	Platform_Inner_Color.Select(hdc);
+	Draw_Expanding_Figure(hdc, EFigure_Type::Ellipse, x + 13, y + 1, 2, 1, ratio, x + 9, y - 1, 10, 8 - one_pixel);
+
+	// 2. Среднее кольцо
+	// Размер: 2 x 1 --> 8 x 6
+	AsConfig::BG_Color.Select(hdc);
+	Draw_Expanding_Figure(hdc, EFigure_Type::Rectangle, x + 13, y + 1, 2, 1, ratio, x + 11, y, 6, 1);
+	Draw_Expanding_Figure(hdc, EFigure_Type::Ellipse, x + 13, y + 1, 2, 1, ratio, x + 10, y, 8, 5 - one_pixel);
+
+	// 3. Внутренняя часть
+	// Размер: 2 x 1 --> 6 x 4
+	AsConfig::White_Color.Select(hdc);
+	Draw_Expanding_Figure(hdc, EFigure_Type::Ellipse, x + 13, y + 1, 2, 1, ratio, x + 11, y, 6, 4 - one_pixel);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Expanding_Figure(HDC hdc, EFigure_Type figure_type, double start_x, double start_y, double start_width, double start_height, double ratio, double end_x, double end_y, double end_width, double end_height)
+{
+	int x, y;
+	int width, height;
+	RECT rect;
+
+	x = Get_Expanding_Value(start_x, end_x, ratio);
+	y = Get_Expanding_Value(start_y, end_y, ratio);
+	width = Get_Expanding_Value(start_width, end_width, ratio);
+	height = Get_Expanding_Value(start_height, end_height, ratio);
+
+	switch (figure_type)
+	{
+	case EFigure_Type::Ellipse:
+		Ellipse(hdc, x, y, x + width - 1, y + height);
+		break;
+
+	case EFigure_Type::Rectangle:
+		Rectangle(hdc, x, y, x + width - 1, y + height);
+		break;
+
+	case EFigure_Type::Round_Rect_3x:
+		rect.left = x;
+		rect.top = y;
+		rect.right = x + width;
+		rect.bottom = y + height + 1;
+
+		AsConfig::Round_Rect(hdc, rect, 3);
+		break;
+
+	default:
+		AsConfig::Throw();
+	}
+}
+//------------------------------------------------------------------------------------------------------------
+int AsPlatform::Get_Expanding_Value(double start, double end, double ratio)
+{
+	int value;
+	double delta;
+
+	delta = end - start;
+	value = (int)( (start + delta * ratio) * AsConfig::D_Global_Scale);
+
+	return value;
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsPlatform::Reflect_On_Circle(double next_x_pos, double next_y_pos, double platform_ball_x_offset, ABall *ball)

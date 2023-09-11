@@ -12,7 +12,8 @@ enum class EPlatform_State: unsigned char
 	Meltdown,
 	Rolling,
 	Glue,
-	Expanding
+	Expanding,
+	Laser
 };
 //------------------------------------------------------------------------------------------------------------
 enum class EPlatform_Substate_Regular: unsigned char
@@ -58,12 +59,28 @@ enum class EPlatform_Substate_Expanding: unsigned char
 	Finalize
 };
 //------------------------------------------------------------------------------------------------------------
+enum class EPlatform_Substate_Laser: unsigned char
+{
+	Unknown,
+
+	Init,
+	Active,
+	Finalize
+};
+//------------------------------------------------------------------------------------------------------------
 enum class EPlatform_Moving_State: unsigned char
 {
 	Stopping,
 	Stop,
 	Moving_Left,
 	Moving_Right
+};
+//------------------------------------------------------------------------------------------------------------
+enum class EFigure_Type: unsigned char
+{
+	Ellipse,
+	Rectangle,
+	Round_Rect_3x
 };
 //------------------------------------------------------------------------------------------------------------
 class AsPlatform_State
@@ -82,6 +99,7 @@ public:
 	EPlatform_Substate_Rolling Rolling;
 	EPlatform_Substate_Glue Glue;
 	EPlatform_Substate_Expanding Expanding;
+	EPlatform_Substate_Laser Laser;
 
 	EPlatform_Moving_State Moving;
 
@@ -126,6 +144,7 @@ private:
 	void Act_For_Rolling_State();
 	void Act_For_Glue_State();
 	void Act_For_Expanding_State();
+	void Act_For_Laser_State();
 	void Draw_Circle_Highlight(HDC hdc, int x, int y);
 	void Draw_Normal_State(HDC hdc, RECT &paint_area);
 	void Draw_Meltdown_State(HDC hdc, RECT &paint_area);
@@ -136,6 +155,13 @@ private:
 	void Draw_Expanding_State(HDC hdc, RECT &paint_area);
 	void Draw_Expanding_Platform_Ball(HDC hdc, bool is_left);
 	void Draw_Expanding_Truss(HDC hdc, RECT &inner_rect, bool is_left);
+	void Draw_Laser_State(HDC hdc, RECT &paint_area);
+	void Draw_Laser_Wing(HDC hdc, bool is_left);
+	void Draw_Laser_Inner_Part(HDC hdc);
+	void Draw_Laser_Leg(HDC hdc, bool is_left);
+	void Draw_Laser_Cabin(HDC hdc);
+	void Draw_Expanding_Figure(HDC hdc, EFigure_Type figure_type, double start_x, double start_y, double start_width, double start_height, double ratio, double end_x, double end_y, double end_width, double end_height);
+	int Get_Expanding_Value(double start, double end, double ratio);
 	bool Reflect_On_Circle(double next_x_pos, double next_y_pos, double platform_ball_x_offset, ABall *ball);
 	bool Get_Platform_Image_Stroke_Color(int x, int y, const AColor **color, int &stroke_len);
 	void Get_Normal_Platform_Image(HDC hdc);
@@ -147,6 +173,7 @@ private:
 	bool Left_Key_Down, Right_Key_Down;
 	int Inner_Width;
 	int Rolling_Step;
+	int Laser_Transformation_Step;
 	int Last_Redraw_Timer_Tick;
 	double Speed;
 	double Glue_Spot_Height_Ratio;
@@ -162,10 +189,11 @@ private:
 
 	RECT Platform_Rect, Prev_Platform_Rect;
 
-	AColor Highlight_Color, Platform_Circle_Color, Platform_Inner_Color, Truss_Color;
+	AColor Highlight_Color, Platform_Circle_Color, Platform_Inner_Color, Truss_Color, Gun_Color;
 
 	static const double Max_Glue_Spot_Height_Ratio, Min_Glue_Spot_Height_Ratio, Glue_Spot_Height_Ratio_Step;
 	static const double Max_Expanding_Platform_Width, Min_Expanding_Platform_Width, Expanding_Platform_Width_Step;
+	static const int Max_Laser_Transformation_Step = 20;
 	static const int Height = 7;
 	static const int Circle_Size = 7;
 	static const int Normal_Platform_Inner_Width = Normal_Width - Circle_Size;

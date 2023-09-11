@@ -35,7 +35,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 
 	//Ball.Set_State(EBS_Normal, Platform.X_Pos + Platform.Width / 2);
 	//Platform.Set_State(EPS_Normal);
-	//Platform.Set_State(EPlatform_State::Expanding);
+	//Platform.Set_State(EPlatform_State::Laser);
 
 	Platform.Redraw_Platform();
 
@@ -258,7 +258,9 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
 		Ball_Set.Triple_Balls();
 		break;
 
-	//case ELT_L:  // "Лазер"
+	case ELT_L:  // "Лазер"
+		Platform.Set_State(EPlatform_State::Laser);
+		break;
 
 	case ELT_P:  // "Пол"
 		AsConfig::Level_Has_Floor = true;
