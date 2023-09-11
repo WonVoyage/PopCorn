@@ -23,13 +23,15 @@ void AsEngine::Init_Engine(HWND hwnd)
 	AActive_Brick_Red_Blue::Setup_Colors();
 
 	Level.Init();
-	Platform.Init(&Ball_Set);
+	Platform.Init(&Ball_Set, &Laser_Beam_Set);
 
 	AFalling_Letter::Init();
 
 	ABall::Add_Hit_Checker(&Border);
 	ABall::Add_Hit_Checker(&Level);
 	ABall::Add_Hit_Checker(&Platform);
+
+	ALaser_Beam::Add_Hit_Checker(&Level);
 
 	Level.Set_Current_Level(AsLevel::Level_01);
 
@@ -45,6 +47,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 	memset(Movers, 0, sizeof(Movers) );
 	Movers[0] = &Platform;
 	Movers[1] = &Ball_Set;
+	Movers[2] = &Laser_Beam_Set;
 
 	// Modules
 	memset(Modules, 0, sizeof(Modules) );
@@ -52,6 +55,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 	Modules[1] = &Border;
 	Modules[2] = &Platform;
 	Modules[3] = &Ball_Set;
+	Modules[4] = &Laser_Beam_Set;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)

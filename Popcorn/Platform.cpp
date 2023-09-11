@@ -456,6 +456,254 @@ void AsPlatform_Expanding::Draw_Expanding_Truss(HDC hdc, RECT &inner_rect, bool 
 
 
 
+// ALaser_Beam
+int ALaser_Beam::Hit_Checkers_Count = 0;
+AHit_Checker *ALaser_Beam::Hit_Checkers[] = {};
+//------------------------------------------------------------------------------------------------------------
+ALaser_Beam::ALaser_Beam()
+: Laser_Beam_State(ELaser_Beam_State::Disabled), X_Pos(0.0), Y_Pos(0.0), Speed(0.0), Beam_Rect{}
+{
+}
+//------------------------------------------------------------------------------------------------------------
+void ALaser_Beam::Begin_Movement()
+{
+	// Заглушка, т.к. этот метод не используется
+}
+//------------------------------------------------------------------------------------------------------------
+void ALaser_Beam::Finish_Movement()
+{
+	if (Laser_Beam_State != ELaser_Beam_State::Disabled)
+		Redraw_Beam();
+}
+//------------------------------------------------------------------------------------------------------------
+void ALaser_Beam::Advance(double max_speed)
+{
+	int i;
+	double next_step;
+
+	if (Laser_Beam_State != ELaser_Beam_State::Active)
+		return;
+
+	next_step = Speed / max_speed * AsConfig::Moving_Step_Size;
+
+	Y_Pos -= next_step;
+
+	if (Y_Pos < AsConfig::Level_Y_Offset)
+		Disable();
+
+	for (i = 0; i < Hit_Checkers_Count; i++)
+		if (Hit_Checkers[i]->Check_Hit(X_Pos, Y_Pos) )
+		{
+			Disable();
+			break;
+		}
+}
+//------------------------------------------------------------------------------------------------------------
+double ALaser_Beam::Get_Speed()
+{
+	return Speed;
+}
+//------------------------------------------------------------------------------------------------------------
+void ALaser_Beam::Act()
+{
+	// Заглушка, т.к. этот метод не используется
+}
+//------------------------------------------------------------------------------------------------------------
+void ALaser_Beam::Clear(HDC hdc, RECT &paint_area)
+{
+	RECT intersection_rect;
+
+	if (Laser_Beam_State == ELaser_Beam_State::Disabled)
+		return;
+
+	if (Laser_Beam_State == ELaser_Beam_State::Cleanup)
+		Laser_Beam_State = ELaser_Beam_State::Disabled;
+
+	if (! IntersectRect(&intersection_rect, &paint_area, &Prev_Beam_Rect) )
+		return;
+
+	AsConfig::BG_Color.Select(hdc);
+
+	Rectangle(hdc, Prev_Beam_Rect.left, Prev_Beam_Rect.top, Prev_Beam_Rect.right - 1, Prev_Beam_Rect.bottom);
+}
+//------------------------------------------------------------------------------------------------------------
+void ALaser_Beam::Draw(HDC hdc, RECT &paint_area)
+{
+	int x_pos, y_pos;
+	RECT intersection_rect;
+
+	if (Laser_Beam_State == ELaser_Beam_State::Disabled)
+		return;
+
+	if (Laser_Beam_State == ELaser_Beam_State::Stopping)
+		Laser_Beam_State = ELaser_Beam_State::Cleanup;
+
+	if (! IntersectRect(&intersection_rect, &paint_area, &Beam_Rect) )
+		return;
+
+	AsConfig::Laser_Color.Select(hdc);
+
+	x_pos = Beam_Rect.left + (Beam_Rect.right - Beam_Rect.left) / 2;
+	y_pos = Beam_Rect.top;
+
+	MoveToEx(hdc, x_pos, y_pos + 1, 0);
+	LineTo(hdc, x_pos, y_pos + Height * AsConfig::Global_Scale - AsConfig::Global_Scale / 2 - 1);
+}
+//------------------------------------------------------------------------------------------------------------
+bool ALaser_Beam::Is_Finished()
+{
+	return false;  // Заглушка, т.к. этот метод не используется
+}
+//------------------------------------------------------------------------------------------------------------
+void ALaser_Beam::Set_At(double x_pos, double y_pos)
+{
+	X_Pos = x_pos;
+	Y_Pos = y_pos;
+
+	Laser_Beam_State = ELaser_Beam_State::Active;
+	Speed = 10.0;
+
+	Redraw_Beam();
+}
+//------------------------------------------------------------------------------------------------------------
+bool ALaser_Beam::Is_Active()
+{
+	if (Laser_Beam_State == ELaser_Beam_State::Active)
+		return true;
+	else
+		return false;
+}
+//------------------------------------------------------------------------------------------------------------
+void ALaser_Beam::Add_Hit_Checker(AHit_Checker *hit_checker)
+{
+	if (Hit_Checkers_Count >= sizeof(Hit_Checkers) / sizeof(Hit_Checkers[0]) )
+		return;
+
+	Hit_Checkers[Hit_Checkers_Count++] = hit_checker;
+}
+//------------------------------------------------------------------------------------------------------------
+void ALaser_Beam::Disable()
+{
+	Laser_Beam_State = ELaser_Beam_State::Stopping;
+	Speed = 0.0;
+}
+//------------------------------------------------------------------------------------------------------------
+void ALaser_Beam::Redraw_Beam()
+{
+	Prev_Beam_Rect = Beam_Rect;
+
+	Beam_Rect.left = (int)( (X_Pos - (double)Width / 2.0) * AsConfig::D_Global_Scale);
+	Beam_Rect.top = (int)(Y_Pos * AsConfig::D_Global_Scale);
+	Beam_Rect.right = Beam_Rect.left + Width * AsConfig::Global_Scale;
+	Beam_Rect.bottom = Beam_Rect.top + Height * AsConfig::Global_Scale;
+
+	AsConfig::Invalidate_Rect(Beam_Rect);
+	AsConfig::Invalidate_Rect(Prev_Beam_Rect);
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+// AsLaser_Beam_Set
+//------------------------------------------------------------------------------------------------------------
+void AsLaser_Beam_Set::Begin_Movement()
+{
+	int i;
+
+	for (i = 0; i < AsConfig::Max_Balls_Count; i++)
+		Laser_Beams[i].Begin_Movement();
+}
+//------------------------------------------------------------------------------------------------------------
+void AsLaser_Beam_Set::Finish_Movement()
+{
+	int i;
+
+	for (i = 0; i < AsConfig::Max_Balls_Count; i++)
+		Laser_Beams[i].Finish_Movement();
+}
+//------------------------------------------------------------------------------------------------------------
+void AsLaser_Beam_Set::Advance(double max_speed)
+{
+	int i;
+
+	for (i = 0; i < AsConfig::Max_Balls_Count; i++)
+		Laser_Beams[i].Advance(max_speed);
+}
+//------------------------------------------------------------------------------------------------------------
+double AsLaser_Beam_Set::Get_Speed()
+{
+	int i;
+	double curr_speed, max_speed = 0.0;
+
+	for (i = 0; i < AsConfig::Max_Balls_Count; i++)
+	{
+		curr_speed = Laser_Beams[i].Get_Speed();
+
+		if (curr_speed > max_speed)
+			max_speed = curr_speed;
+	}
+
+	return max_speed;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsLaser_Beam_Set::Act()
+{
+	// Заглушка. Не используется, т.к. лучи сами ничего не делают (не анимируется)
+}
+//------------------------------------------------------------------------------------------------------------
+void AsLaser_Beam_Set::Clear(HDC hdc, RECT &paint_area)
+{
+	int i;
+
+	for (i = 0; i < AsConfig::Max_Balls_Count; i++)
+		Laser_Beams[i].Clear(hdc, paint_area);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsLaser_Beam_Set::Draw(HDC hdc, RECT &paint_area)
+{
+	int i;
+
+	for (i = 0; i < AsConfig::Max_Balls_Count; i++)
+		Laser_Beams[i].Draw(hdc, paint_area);
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsLaser_Beam_Set::Is_Finished()
+{
+	return false;  // Заглушка, т.к. этот метод не используется
+}
+//------------------------------------------------------------------------------------------------------------
+void AsLaser_Beam_Set::Fire(double left_gun_x_pos, double right_gun_x_pos)
+{
+	int i;
+	ALaser_Beam *left_beam = 0, *right_beam = 0;
+
+	for (i = 0; i < Max_Laser_Beam_Count; i++)
+	{
+		if (Laser_Beams[i].Is_Active() )
+			continue;
+
+		if (left_beam == 0)
+			left_beam = &Laser_Beams[i];
+		else
+			if (right_beam == 0)
+			{
+				right_beam = &Laser_Beams[i];
+				break;
+			}
+	}
+
+	if (left_beam == 0 || right_beam == 0)
+		AsConfig::Throw();  // Не хватило "свободных" лазерных лучей!
+
+	left_beam->Set_At(left_gun_x_pos, AsConfig::Platform_Y_Pos - 1);
+	right_beam->Set_At(right_gun_x_pos, AsConfig::Platform_Y_Pos - 1);
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
 // AsPlatform_Laser
 //------------------------------------------------------------------------------------------------------------
 AsPlatform_Laser::~AsPlatform_Laser()
@@ -464,20 +712,23 @@ AsPlatform_Laser::~AsPlatform_Laser()
 }
 //------------------------------------------------------------------------------------------------------------
 AsPlatform_Laser::AsPlatform_Laser(AsPlatform_State &platform_state)
-: Laser_Transformation_Step(0), Platform_State(&platform_state), Circle_Color(0), Inner_Color(0), Gun_Color(0)
+: Enable_Laser_Firing(false), Laser_Transformation_Step(0), Last_Laser_Shot_Tick(0), Platform_State(&platform_state),
+  Laser_Beam_Set(0), Circle_Color(0), Inner_Color(0), Gun_Color(0)
 {
 }
 //------------------------------------------------------------------------------------------------------------
-void AsPlatform_Laser::Init(AColor &highlight_color, AColor &circle_color, AColor &inner_color)
+void AsPlatform_Laser::Init(AsLaser_Beam_Set *laser_beam_set, AColor &highlight_color, AColor &circle_color, AColor &inner_color)
 {
+	Laser_Beam_Set = laser_beam_set;
 	Circle_Color = &circle_color;
 	Inner_Color = &inner_color;
 
 	Gun_Color = new AColor(highlight_color, AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
-bool AsPlatform_Laser::Act(EPlatform_State &next_state)
+bool AsPlatform_Laser::Act(EPlatform_State &next_state, double x_pos)
 {
+	double left_gun_x_pos, right_gun_x_pos;
 	next_state = EPlatform_State::Unknown;
 
 	switch (Platform_State->Laser)
@@ -492,6 +743,18 @@ bool AsPlatform_Laser::Act(EPlatform_State &next_state)
 
 
 	case EPlatform_Transformation::Active:
+		if (Enable_Laser_Firing)
+		{
+			if (Last_Laser_Shot_Tick + Laser_Shot_Timeout <= AsConfig::Current_Timer_Tick)
+			{
+				Last_Laser_Shot_Tick = AsConfig::Current_Timer_Tick + Laser_Shot_Timeout;
+
+				left_gun_x_pos = Get_Gun_Pos(x_pos, true) + 0.5;
+				right_gun_x_pos = Get_Gun_Pos(x_pos, false) + 0.5;
+
+				Laser_Beam_Set->Fire(left_gun_x_pos, right_gun_x_pos);
+			}
+		}
 		break;
 
 
@@ -502,6 +765,7 @@ bool AsPlatform_Laser::Act(EPlatform_State &next_state)
 		{
 			Platform_State->Laser = EPlatform_Transformation::Unknown;
 			next_state = Platform_State->Set_State(EPlatform_Substate_Regular::Normal);
+			Enable_Laser_Firing = false;
 		}
 
 		return true;
@@ -552,6 +816,14 @@ void AsPlatform_Laser::Reset()
 	Laser_Transformation_Step = 0;
 }
 //------------------------------------------------------------------------------------------------------------
+void AsPlatform_Laser::Fire(bool fire_on)
+{
+	if (Platform_State->Laser != EPlatform_Transformation::Active)
+		return;  // Игнорируем выстрел, пока платформа не сформируется
+
+	Enable_Laser_Firing = fire_on;
+}
+//------------------------------------------------------------------------------------------------------------
 void AsPlatform_Laser::Draw_Laser_Wing(HDC hdc, double x_pos, bool is_left)
 {// Рисуем крыло лазерной платформы
 
@@ -592,10 +864,12 @@ void AsPlatform_Laser::Draw_Laser_Wing(HDC hdc, double x_pos, bool is_left)
 
 		Gun_Color->Select(hdc);
 
-		if (is_left)
-			x = x_pos + 3.0;
-		else
-			x = x_pos + (AsPlatform::Normal_Width - 4);
+		//if (is_left)
+		//	x = x_pos + 3.0;
+		//else
+		//	x = x_pos + (AsPlatform::Normal_Width - 4);
+
+		x = Get_Gun_Pos(x_pos, is_left);
 
 		height = 3.0 * (1.0 - ratio) * d_scale;
 
@@ -726,6 +1000,18 @@ int AsPlatform_Laser::Get_Expanding_Value(double start, double end, double ratio
 	value = (int)( (start + delta * ratio) * AsConfig::D_Global_Scale);
 
 	return value;
+}
+//------------------------------------------------------------------------------------------------------------
+double AsPlatform_Laser::Get_Gun_Pos(double platform_x_pos, bool is_left)
+{
+	double gun_x_pos;
+
+	if (is_left)
+		gun_x_pos = platform_x_pos + 3.0;
+	else
+		gun_x_pos = platform_x_pos + (AsPlatform::Normal_Width - 4);
+
+	return gun_x_pos;
 }
 //------------------------------------------------------------------------------------------------------------
 
@@ -887,7 +1173,7 @@ void AsPlatform::Act()
 
 
 	case EPlatform_State::Laser:
-		if (Platform_Laser.Act(next_state) )
+		if (Platform_Laser.Act(next_state, X_Pos) )
 			Redraw_Platform();
 
 		if (next_state != EPlatform_State::Unknown)
@@ -966,12 +1252,12 @@ bool AsPlatform::Is_Finished()
 	return false;  // Заглушка, т.к. этот метод не используется
 }
 //------------------------------------------------------------------------------------------------------------
-void AsPlatform::Init(AsBall_Set *ball_set)
+void AsPlatform::Init(AsBall_Set *ball_set, AsLaser_Beam_Set *laser_beam_set)
 {
 	Ball_Set = ball_set;
 
 	Platform_Expanding.Init(Highlight_Color, Platform_Circle_Color, Platform_Inner_Color);
-	Platform_Laser.Init(Highlight_Color, Platform_Circle_Color, Platform_Inner_Color);
+	Platform_Laser.Init(laser_beam_set, Highlight_Color, Platform_Circle_Color, Platform_Inner_Color);
 }
 //------------------------------------------------------------------------------------------------------------
 EPlatform_State AsPlatform::Get_State()
@@ -1126,19 +1412,22 @@ void AsPlatform::Move(bool to_left, bool key_down)
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::On_Space_Key(bool key_down)
 {
-	if (! key_down)
-		return;
-
 	if (Has_State(EPlatform_Substate_Regular::Ready) )
 	{
-		Ball_Set->Release_From_Platform(Get_Middle_Pos() );
-		Set_State(EPlatform_Substate_Regular::Normal);
+		if (! key_down)
+		{
+			Ball_Set->Release_From_Platform(Get_Middle_Pos() );
+			Set_State(EPlatform_Substate_Regular::Normal);
+		}
 	}
 	else
 		if (Platform_State == EPlatform_State::Glue)
-			Ball_Set->Release_Next_Ball();
+		{
+			if (! key_down)
+				Ball_Set->Release_Next_Ball();
+		}
 		else if (Platform_State == EPlatform_State::Laser)
-			AsConfig::Throw();  //!!! Надо сделать!
+			Platform_Laser.Fire(key_down);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsPlatform::Hit_By(AFalling_Letter *falling_letter)
