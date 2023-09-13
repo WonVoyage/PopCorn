@@ -37,6 +37,7 @@ char AsLevel::Test_Level[AsConfig::Level_Height][AsConfig::Level_Width] =
 };
 
 // AsLevel
+AsLevel *AsLevel::Level = 0;
 //------------------------------------------------------------------------------------------------------------
 AsLevel::~AsLevel()
 {
@@ -49,6 +50,7 @@ AsLevel::AsLevel()
 : Level_Rect{}, Need_To_Cancel_All(false), Active_Bricks_Count(0), Falling_Letters_Count(0), Teleport_Bricks_Count(0), Teleport_Bricks_Pos(0),
   Parachute_Color(AsConfig::Red_Color, AsConfig::Blue_Color, AsConfig::Global_Scale), Advertisement(0)
 {
+	Level = this;
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsLevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
@@ -332,6 +334,24 @@ bool AsLevel::Get_Next_Falling_Letter(int &index, AFalling_Letter **falling_lett
 void AsLevel::Stop()
 {
 	Need_To_Cancel_All = true;
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsLevel::Has_Brick_At(int level_x, int level_y)
+{
+	EBrick_Type brick_type;
+
+	if (level_x < 0 || level_x >= AsConfig::Level_Width)
+		return false;
+
+	if (level_y < 0 || level_y >= AsConfig::Level_Height)
+		return false;
+
+	brick_type = (EBrick_Type)Level->Current_Level[level_y][level_x];
+
+	if (brick_type == EBrick_Type::None)
+		return false;
+	else
+		return true;
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsLevel::On_Hit(int brick_x, int brick_y, ABall *ball, bool vertical_hit)

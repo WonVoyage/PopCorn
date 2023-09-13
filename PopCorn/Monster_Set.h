@@ -14,6 +14,7 @@ enum class EEye_State: unsigned char
 enum class EMonster_State: unsigned char
 {
 	Missing,
+	Emitting,
 	Alive,
 	Destroing
 };
@@ -73,22 +74,28 @@ public:
 	virtual void Draw(HDC hdc, RECT &paint_area);
 	virtual bool Is_Finished();
 
-	void Activate(int x_pos, int y_pos);
+	void Activate(int x_pos, int y_pos, bool moving_right);
 	bool Is_Active();
 	void Destroy();
+
+	static const int Width = 16;
+	static const int Height = 16;
 
 private:
 	void Draw_Alive(HDC hdc);
 	void Draw_Destroing(HDC hdc, RECT &paint_area);
 	void Act_Alive();
 	void Act_Destroing();
+	void Redraw_Monster();
 
 	EEye_State Eye_State;
 	EMonster_State Monster_State;
-	int X_Pos, Y_Pos;
+	double X_Pos, Y_Pos;
+	double Speed, Direction;
 	double Cornea_Height;
 	int Start_Blink_Timeout, Total_Animation_Timeout;
-	RECT Monster_Rect;
+	int Next_Direction_Switch_Tick, Alive_Timer_Tick;
+	RECT Monster_Rect, Prev_Monster_Rect;
 
 	static const int Blink_Stages_Count = 7;
 	static const int Explosive_Balls_Count = 20;
@@ -96,24 +103,36 @@ private:
 	int Blink_Ticks[Blink_Stages_Count];
 	AExplosive_Ball Explosive_Balls[Explosive_Balls_Count];
 
-	static const int Width = 16;
-	static const int Height = 16;
 	static const double Max_Cornea_Height;
 	static const double Blink_Timeouts[Blink_Stages_Count];
 	static const EEye_State Blink_States[Blink_Stages_Count];
 };
 //------------------------------------------------------------------------------------------------------------
-class AsMonster_Set: public AsGame_Objects_Set
+enum class EMonster_Set_State: unsigned char
+{
+	Idle,
+	Selecting_Next_Gate,
+	Waiting_Gate_Opening,
+	Waiting_Gate_Closing
+};
+//------------------------------------------------------------------------------------------------------------
+class AsMonster_Set: public AGame_Objects_Set
 {
 public:
 	AsMonster_Set();
 
+	virtual void Act();
+
 	void Init(AsBorder *border);
 	void Emit_At_Gate(int gate_index);
+	void Activate(int max_alive_monsters_count);
 
 private:
 	bool Get_Next_Game_Object(int &index, AGame_Object **game_obj);
 
+	EMonster_Set_State Monster_Set_State;
+	int Current_Gate_Index;
+	int Max_Alive_Monsters_Count;
 	AsBorder *Border;  // UNO
 
 	static const int Max_Monsters_Count = 10;

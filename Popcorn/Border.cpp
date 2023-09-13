@@ -19,11 +19,11 @@ AsBorder::AsBorder()
 	Floor_Rect.bottom = AsConfig::Max_Y_Pos * AsConfig::Global_Scale;
 
 	// Гейты
-	Gates[0] = new AGate(1, 29);
-	Gates[1] = new AGate(AsConfig::Max_X_Pos, 29);
+	Gates[0] = new AGate(1, 29, 0, 3);
+	Gates[1] = new AGate(AsConfig::Max_X_Pos, 29, AsConfig::Level_Width - 1, 3);
 
-	Gates[2] = new AGate(1, 77);
-	Gates[3] = new AGate(AsConfig::Max_X_Pos, 77);
+	Gates[2] = new AGate(1, 77, 0, 9);
+	Gates[3] = new AGate(AsConfig::Max_X_Pos, 77, AsConfig::Level_Width - 1, 9);
 
 	Gates[4] = new AGate(1, 129);
 	Gates[5] = new AGate(AsConfig::Max_X_Pos, 129);
@@ -48,10 +48,64 @@ void AsBorder::Open_Gate(int gate_index, bool short_open)
 		AsConfig::Throw();
 }
 //------------------------------------------------------------------------------------------------------------
+int AsBorder::Long_Open_Gate()
+{
+	int i;
+	int gate_index;
+	bool got_gate = false;
+	AGate *gate;
+
+	gate_index = AsTools::Rand(AsConfig::Gates_Count);
+
+	for (i = 0; i < AsConfig::Gates_Count; i++)
+	{
+		gate = Gates[gate_index];
+
+		if (gate->Is_Closed() )
+		{
+			if (gate->Level_X_Pos == -1)
+			{
+				got_gate = true;
+				break;
+			}
+
+			if (! AsLevel::Has_Brick_At(gate->Level_X_Pos, gate->Level_Y_Pos)
+				&& ! AsLevel::Has_Brick_At(gate->Level_X_Pos, gate->Level_Y_Pos + 1) )
+			{
+				got_gate = true;
+				break;
+			}
+		}
+
+		++gate_index;
+
+		if (gate_index >= AsConfig::Gates_Count)
+			gate_index = 0;
+	}
+
+	if (! got_gate)
+		AsConfig::Throw();
+
+	Open_Gate(gate_index, false);
+
+	return gate_index;
+}
+//------------------------------------------------------------------------------------------------------------
 bool AsBorder::Is_Gate_Opened(int gate_index)
 {
 	if (gate_index >= 0 && gate_index < AsConfig::Gates_Count)
 		return Gates[gate_index]->Is_Opened();
+	else
+	{
+		AsConfig::Throw();
+		return false;
+	}
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsBorder::Is_Gate_Closed(int gate_index)
+{
+	if (gate_index >= 0 && gate_index < AsConfig::Gates_Count)
+		return Gates[gate_index]->Is_Closed();
 	else
 	{
 		AsConfig::Throw();

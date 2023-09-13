@@ -154,29 +154,54 @@ const EEye_State AMonster::Blink_States[Blink_Stages_Count] =
 };
 //------------------------------------------------------------------------------------------------------------
 AMonster::AMonster()
-: Monster_State(EMonster_State::Missing), Eye_State(EEye_State::Closed), X_Pos(0), Y_Pos(0), Cornea_Height(Max_Cornea_Height), Start_Blink_Timeout(0),
-  Total_Animation_Timeout(0), Monster_Rect{}, Blink_Ticks{}
+: Monster_State(EMonster_State::Missing), Eye_State(EEye_State::Closed), X_Pos(0), Y_Pos(0), Speed(0.0), Direction(0.0),
+  Cornea_Height(Max_Cornea_Height), Start_Blink_Timeout(0), Total_Animation_Timeout(0), Next_Direction_Switch_Tick(0),
+  Alive_Timer_Tick(0), Monster_Rect{}, Blink_Ticks{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
 void AMonster::Begin_Movement()
 {
-	//!!! Надо сделать!
+	// Заглушка, не используется.
 }
 //------------------------------------------------------------------------------------------------------------
 void AMonster::Finish_Movement()
 {
-	//!!! Надо сделать!
+	if (! Is_Active() )
+		return;
+
+	Redraw_Monster();
 }
 //------------------------------------------------------------------------------------------------------------
 void AMonster::Advance(double max_speed)
 {
-	//!!! Надо сделать!
+	double next_step;
+
+	next_step = Speed / max_speed * AsConfig::Moving_Step_Size;
+
+	X_Pos += next_step * cos(Direction);
+	Y_Pos -= next_step * sin(Direction);
+
+	// Ограничиваем перемещение рамками уровня
+	if (Monster_State == EMonster_State::Alive)
+	{
+		if (X_Pos < (double)AsConfig::Level_X_Offset)
+			X_Pos = (double)AsConfig::Level_X_Offset;
+
+		if (X_Pos + (double)Width > (double)AsConfig::Max_X_Pos)
+			X_Pos = (double)(AsConfig::Max_X_Pos - Width);
+
+		if (Y_Pos < (double)AsConfig::Level_Y_Offset)
+			Y_Pos = (double)AsConfig::Level_Y_Offset;
+
+		if (Y_Pos + (double)Width > (double)AsConfig::Max_Y_Pos)
+			Y_Pos = (double)(AsConfig::Max_Y_Pos - Width);
+	}
 }
 //------------------------------------------------------------------------------------------------------------
 double AMonster::Get_Speed()
 {
-	return 0.0;  //!!! Надо сделать!
+	return Speed;
 }
 //------------------------------------------------------------------------------------------------------------
 void AMonster::Act()
@@ -185,6 +210,11 @@ void AMonster::Act()
 	{
 	case EMonster_State::Missing:
 		return;
+
+	case EMonster_State::Emitting:
+		if (AsConfig::Current_Timer_Tick >= Alive_Timer_Tick)
+			Monster_State = EMonster_State::Alive;
+		break;
 
 	case EMonster_State::Alive:
 		Act_Alive();
@@ -202,10 +232,10 @@ void AMonster::Clear(HDC hdc, RECT &paint_area)
 {
 	RECT intersection_rect;
 
-	if (! IntersectRect(&intersection_rect, &paint_area, &Monster_Rect) )
+	if (! IntersectRect(&intersection_rect, &paint_area, &Prev_Monster_Rect) )
 		return;
 
-	AsTools::Ellipse(hdc, Monster_Rect, AsConfig::BG_Color);
+	AsTools::Ellipse(hdc, Prev_Monster_Rect, AsConfig::BG_Color);
 }
 //------------------------------------------------------------------------------------------------------------
 void AMonster::Draw(HDC hdc, RECT &paint_area)
@@ -221,6 +251,7 @@ void AMonster::Draw(HDC hdc, RECT &paint_area)
 		break;
 
 	case EMonster_State::Alive:
+	case EMonster_State::Emitting:
 		Draw_Alive(hdc);
 		break;
 
@@ -238,22 +269,29 @@ bool AMonster::Is_Finished()
 	return false;  //!!! Надо сделать!
 }
 //------------------------------------------------------------------------------------------------------------
-void AMonster::Activate(int x_pos, int y_pos)
+void AMonster::Activate(int x_pos, int y_pos, bool moving_right)
 {
 	int i;
 	int tick_offset;
+	int rand_speed;
+	int emitting_time_offset;
 	double curr_timeout = 0.0;
-	const int scale = AsConfig::Global_Scale;
 
-	Monster_State = EMonster_State::Alive;
+	Monster_State = EMonster_State::Emitting;
 
-	X_Pos = x_pos + 10;
+	X_Pos = x_pos;
 	Y_Pos = y_pos;
 
-	Monster_Rect.left = X_Pos * scale;
-	Monster_Rect.top = Y_Pos * scale;
-	Monster_Rect.right = Monster_Rect.left + Width * scale;
-	Monster_Rect.bottom = Monster_Rect.top + Height * scale;
+	rand_speed = AsTools::Rand(5) + 1;
+	Speed = (double)rand_speed / 10.0;
+
+	emitting_time_offset = (int)( (double)AGate::Width / Speed);
+	Alive_Timer_Tick = AsConfig::Current_Timer_Tick + emitting_time_offset;
+
+	if (moving_right)
+		Direction = 0.0;
+	else
+		Direction = M_PI;
 
 	// Рассчитываем тики анимации
 	curr_timeout;
@@ -267,6 +305,8 @@ void AMonster::Activate(int x_pos, int y_pos)
 	}
 
 	Total_Animation_Timeout = tick_offset;
+
+	Redraw_Monster();
 }
 //------------------------------------------------------------------------------------------------------------
 bool AMonster::Is_Active()
@@ -282,8 +322,8 @@ void AMonster::Destroy()
 	int i;
 	int half_width = Width * AsConfig::Global_Scale / 2;
 	int half_height = Height * AsConfig::Global_Scale / 2;
-	int x_pos = X_Pos * AsConfig::Global_Scale + half_width;
-	int y_pos = Y_Pos * AsConfig::Global_Scale + half_height;
+	int x_pos = (int)(X_Pos * AsConfig::D_Global_Scale) + half_width;
+	int y_pos = (int)(Y_Pos * AsConfig::D_Global_Scale) + half_height;
 	int x_offset, y_offset;
 	int size, half_size, rest_size;
 	int time_offset;
@@ -318,11 +358,6 @@ void AMonster::Destroy()
 
 
 	Monster_State = EMonster_State::Destroing;
-
-	//Explosive_Balls[0].Explode(Monster_Rect.left + 20, Monster_Rect.top + 20, 30, 0, 10);
-	//Explosive_Balls[1].Explode(Monster_Rect.left + 30, Monster_Rect.top + 30, 25, 5, 10);
-	//Explosive_Balls[2].Explode(Monster_Rect.left + 20, Monster_Rect.top + 30, 20, 10, 10);
-	//Explosive_Balls[3].Explode(Monster_Rect.left + 30, Monster_Rect.top + 20, 15, 15, 10);
 }
 //------------------------------------------------------------------------------------------------------------
 void AMonster::Draw_Alive(HDC hdc)
@@ -424,6 +459,7 @@ void AMonster::Act_Alive()
 	int curr_tick_offset;
 	int prev_tick;
 	double ratio;
+	double direction_delta;
 
 	if (Monster_State == EMonster_State::Missing)
 		return;
@@ -467,6 +503,15 @@ void AMonster::Act_Alive()
 	default:
 		AsConfig::Throw();
 	}
+
+	if (AsConfig::Current_Timer_Tick > Next_Direction_Switch_Tick)
+	{
+		Next_Direction_Switch_Tick += AsTools::Rand(AsConfig::FPS);
+
+		// Выбираем случайное направление +/- 45 градусов
+		direction_delta = (double)(AsTools::Rand(90) - 45) * M_PI / 180.0;
+		Direction += direction_delta;
+	}
 }
 //------------------------------------------------------------------------------------------------------------
 void AMonster::Act_Destroing()
@@ -477,6 +522,19 @@ void AMonster::Act_Destroing()
 		Explosive_Balls[i].Act();
 }
 //------------------------------------------------------------------------------------------------------------
+void AMonster::Redraw_Monster()
+{
+	Prev_Monster_Rect = Monster_Rect;
+
+	Monster_Rect.left = (int)(X_Pos * AsConfig::D_Global_Scale);
+	Monster_Rect.top = (int)(Y_Pos * AsConfig::D_Global_Scale);
+	Monster_Rect.right = Monster_Rect.left + Width * AsConfig::Global_Scale;
+	Monster_Rect.bottom = Monster_Rect.top + Height * AsConfig::Global_Scale;
+
+	AsTools::Invalidate_Rect(Monster_Rect);
+	AsTools::Invalidate_Rect(Prev_Monster_Rect);
+}
+//------------------------------------------------------------------------------------------------------------
 
 
 
@@ -484,7 +542,7 @@ void AMonster::Act_Destroing()
 // AsMonster_Set
 //------------------------------------------------------------------------------------------------------------
 AsMonster_Set::AsMonster_Set()
-: Border(0)
+: Monster_Set_State(EMonster_Set_State::Idle), Current_Gate_Index(-1), Max_Alive_Monsters_Count(0), Border(0)
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -493,9 +551,61 @@ void AsMonster_Set::Init(AsBorder *border)
 	Border = border;
 }
 //------------------------------------------------------------------------------------------------------------
+void AsMonster_Set::Act()
+{
+	int i;
+	int current_alive_count;
+
+	switch (Monster_Set_State)
+	{
+	case EMonster_Set_State::Idle:
+		break;
+
+
+	case EMonster_Set_State::Selecting_Next_Gate:
+		// Считаем количество живых монстров
+		current_alive_count = 0;
+
+		for (i = 0; i < Max_Monsters_Count; i++)
+			if (Monsters[i].Is_Active() )
+				++current_alive_count;
+
+		// Добавляем нового монстра, если можно
+		if (current_alive_count < Max_Alive_Monsters_Count)
+		{
+			Current_Gate_Index = Border->Long_Open_Gate();
+			Monster_Set_State = EMonster_Set_State::Waiting_Gate_Opening;
+		}
+		break;
+
+
+	case EMonster_Set_State::Waiting_Gate_Opening:
+		if (Border->Is_Gate_Opened(Current_Gate_Index) )
+		{
+			Emit_At_Gate(Current_Gate_Index);
+			Monster_Set_State = EMonster_Set_State::Waiting_Gate_Closing;
+		}
+		break;
+
+
+	case EMonster_Set_State::Waiting_Gate_Closing:
+		if (Border->Is_Gate_Closed(Current_Gate_Index) )
+			Monster_Set_State = EMonster_Set_State::Selecting_Next_Gate;
+
+		break;
+
+
+	default:
+		AsConfig::Throw();
+	}
+
+	AGame_Objects_Set::Act();
+}
+//------------------------------------------------------------------------------------------------------------
 void AsMonster_Set::Emit_At_Gate(int gate_index)
 {
 	int i;
+	bool gate_is_left;
 	int gate_x_pos, gate_y_pos;
 	AMonster *monster = 0;
 
@@ -516,9 +626,23 @@ void AsMonster_Set::Emit_At_Gate(int gate_index)
 
 	Border->Get_Gate_Pos(gate_index, gate_x_pos, gate_y_pos);
 
-	monster->Activate(gate_x_pos, gate_y_pos);
+	if (gate_index % 2 == 0)
+		gate_is_left = true;
+	else
+		gate_is_left = false;
 
-	monster->Destroy();
+	if (! gate_is_left)
+		gate_x_pos -= monster->Width - AGate::Width;
+
+	monster->Activate(gate_x_pos, gate_y_pos + 1, gate_is_left);
+
+	//monster->Destroy();
+}
+//------------------------------------------------------------------------------------------------------------
+void AsMonster_Set::Activate(int max_alive_monsters_count)
+{
+	Monster_Set_State = EMonster_Set_State::Selecting_Next_Gate;
+	Max_Alive_Monsters_Count = max_alive_monsters_count;
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsMonster_Set::Get_Next_Game_Object(int &index, AGame_Object **game_obj)
