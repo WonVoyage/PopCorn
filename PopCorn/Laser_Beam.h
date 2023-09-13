@@ -28,11 +28,11 @@ public:
 
 	void Set_At(double x_pos, double y_pos);
 	bool Is_Active();
+	void Disable();
 
 	static AHit_Checker_List Hit_Checker_List;
 
 private:
-	void Disable();
 	void Redraw_Beam();
 
 	ELaser_Beam_State Laser_Beam_State;

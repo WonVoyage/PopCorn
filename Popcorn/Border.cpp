@@ -61,21 +61,22 @@ int AsBorder::Long_Open_Gate()
 	{
 		gate = Gates[gate_index];
 
-		if (gate->Is_Closed() )
-		{
-			if (gate->Level_X_Pos == -1)
+		if (gate_index != AsConfig::Gates_Count - 1)  // Гейт, из которого выкатывается платформа, не выпускает монстров
+			if (gate->Is_Closed() )
 			{
-				got_gate = true;
-				break;
-			}
+				if (gate->Level_X_Pos == -1)
+				{
+					got_gate = true;
+					break;
+				}
 
-			if (! AsLevel::Has_Brick_At(gate->Level_X_Pos, gate->Level_Y_Pos)
-				&& ! AsLevel::Has_Brick_At(gate->Level_X_Pos, gate->Level_Y_Pos + 1) )
-			{
-				got_gate = true;
-				break;
+				if (! AsLevel::Has_Brick_At(gate->Level_X_Pos, gate->Level_Y_Pos)
+					&& ! AsLevel::Has_Brick_At(gate->Level_X_Pos, gate->Level_Y_Pos + 1) )
+				{
+					got_gate = true;
+					break;
+				}
 			}
-		}
 
 		++gate_index;
 
@@ -121,41 +122,41 @@ void AsBorder::Get_Gate_Pos(int gate_index, int &gate_x_pos, int &gate_y_pos)
 		AsConfig::Throw();
 }
 //------------------------------------------------------------------------------------------------------------
-bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
+bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall_Object *ball)
 {// Корректируем позицию при отражении от рамки
 
 	bool got_hit = false;
 	
 	// 1. Левый край
-	if (next_x_pos - ball->Radius < AsConfig::Border_X_Offset)
+	if (next_x_pos - AsConfig::Ball_Radius < AsConfig::Border_X_Offset)
 	{
 		got_hit = true;
 		ball->Reflect(false);
 	}
 
 	// 2. Верхний край
-	if (next_y_pos - ball->Radius < AsConfig::Border_Y_Offset)
+	if (next_y_pos - AsConfig::Ball_Radius < AsConfig::Border_Y_Offset)
 	{
 		got_hit = true;
 		ball->Reflect(true);
 	}
 
 	// 3. Правый край
-	if (next_x_pos + ball->Radius > AsConfig::Max_X_Pos + 1)
+	if (next_x_pos + AsConfig::Ball_Radius > AsConfig::Max_X_Pos + 1)
 	{
 		got_hit = true;
 		ball->Reflect(false);
 	}
 
 	// 4. Нижний край
-	if (AsConfig::Level_Has_Floor && next_y_pos + ball->Radius > AsConfig::Floor_Y_Pos)
+	if (AsConfig::Level_Has_Floor && next_y_pos + AsConfig::Ball_Radius > AsConfig::Floor_Y_Pos)
 	{
 		got_hit = true;
 		ball->Reflect(true);
 	}
 
 	// Чтобы шарик смог улететь ниже пола, проверяем его max_y_pos ниже видимой границы
-	if (next_y_pos + ball->Radius > (double)AsConfig::Max_Y_Pos + ball->Radius * 4.0)  
+	if (next_y_pos + AsConfig::Ball_Radius > (double)AsConfig::Max_Y_Pos + AsConfig::Ball_Radius * 4.0)  
 		ball->Set_State(EBall_State::Lost);
 
 	return got_hit;
