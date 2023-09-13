@@ -32,6 +32,7 @@ public:
 	void Open_Gate(bool short_open);
 	bool Is_Opened();
 	void Get_Y_Size(int &gate_top_y, int &gate_low_y);
+	void Get_Pos(int &gate_x_pos, int &gate_y_pos);
 
 private:
 	bool Act_For_Open(bool short_open, bool &correct_pos);

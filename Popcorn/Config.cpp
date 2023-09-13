@@ -16,6 +16,10 @@ const AColor AsConfig::Unbreakable_Red_Highlight(AsConfig::Red_Color, 3 * AsConf
 const AColor AsConfig::Teleport_Portal_Color(AsConfig::Blue_Color, AsConfig::BG_Color, AsConfig::Global_Scale);
 const AColor AsConfig::Advertisement_Blue_Table(0, 159, 159, AsConfig::Global_Scale);
 const AColor AsConfig::Advertisement_Red_Table(AsConfig::Red_Color, 2 * AsConfig::Global_Scale);
+const AColor AsConfig::Monster_Dark_Red_Color(191, 31, 31);
+const AColor AsConfig::Monster_Cornea_Color(AsConfig::BG_Color, AsConfig::White_Color, AsConfig::Global_Scale * 2 / 3);
+const AColor AsConfig::Monster_Iris_Color(AsConfig::BG_Color, AsConfig::Blue_Color, AsConfig::Global_Scale * 2 / 3);
+const AColor AsConfig::BG_Outline_Color(AsConfig::BG_Color, AsConfig::Global_Scale * 2 / 3);
 
 HWND AsConfig::Hwnd;
 

@@ -6,6 +6,7 @@
 #include "Level.h"
 #include "Platform.h"
 #include "Ball_Set.h"
+#include "Monster_Set.h"
 
 //------------------------------------------------------------------------------------------------------------
 enum class EKey_Type: unsigned char
@@ -53,6 +54,7 @@ private:
 	AsBorder Border;
 	AsBall_Set Ball_Set;
 	AsLaser_Beam_Set Laser_Beam_Set;
+	AsMonster_Set Monster_Set;
 
 	//AMover *Movers[AsConfig::Max_Movers_Count];  // UNO; Движущиеся в данный момент объекты
 	//AGraphics_Object *Modules[AsConfig::Max_Modules_Count];  // UNO; Главные графические объекты (модули) игры

@@ -82,6 +82,9 @@
     <Filter Include="#Tools\Common">
       <UniqueIdentifier>{62a1250e-6759-4674-b457-e3e4964da561}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Monster_Set">
+      <UniqueIdentifier>{a5335a3b-2624-4314-8188-bb6a26f082bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -146,6 +149,9 @@
     </ClInclude>
     <ClInclude Include="Common.h">
       <Filter>#Tools\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster_Set.h">
+      <Filter>Monster_Set</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -215,6 +221,9 @@
     </ClCompile>
     <ClCompile Include="Common.cpp">
       <Filter>#Tools\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster_Set.cpp">
+      <Filter>Monster_Set</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

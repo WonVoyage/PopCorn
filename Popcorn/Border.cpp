@@ -59,6 +59,14 @@ bool AsBorder::Is_Gate_Opened(int gate_index)
 	}
 }
 //------------------------------------------------------------------------------------------------------------
+void AsBorder::Get_Gate_Pos(int gate_index, int &gate_x_pos, int &gate_y_pos)
+{
+	if (gate_index >= 0 && gate_index < AsConfig::Gates_Count)
+		Gates[gate_index]->Get_Pos(gate_x_pos, gate_y_pos);
+	else
+		AsConfig::Throw();
+}
+//------------------------------------------------------------------------------------------------------------
 bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 {// Корректируем позицию при отражении от рамки
 
