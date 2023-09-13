@@ -23,6 +23,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 	AsConfig::Hwnd = hwnd;
 
 	AActive_Brick_Red_Blue::Setup_Colors();
+	AExplosive_Ball::Setup_Colors();
 
 	Level.Init();
 	Platform.Init(&Ball_Set, &Laser_Beam_Set);
@@ -126,7 +127,6 @@ int AsEngine::On_Timer()
 		{
 			Game_State = EGame_State::Play_Level;
 			Ball_Set.Set_On_Platform(Platform.Get_Middle_Pos() );
-			//Platform.Set_State(EPS_Glue_Init);
 		}
 		break;
 	}
