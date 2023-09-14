@@ -28,11 +28,13 @@ public:
 	void Emit_At_Gate(int gate_index);
 	void Activate(int max_alive_monsters_count);
 	void Destroy_All();
+	void Set_Freeze_State(bool freeze);
 
 private:
 	bool Get_Next_Game_Object(int &index, AGame_Object **game_obj);
 
 	EMonster_Set_State Monster_Set_State;
+	bool Is_Frozen;
 	int Current_Gate_Index;
 	int Max_Alive_Monsters_Count;
 	AsBorder *Border;  // UNO

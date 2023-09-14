@@ -43,6 +43,7 @@ public:
 
 	void Activate(int x_pos, int y_pos, bool moving_right);
 	void Destroy();
+	void Set_Freeze_State(bool freeze);
 
 	static const int Width = 16;
 	static const int Height = 16;
@@ -53,6 +54,7 @@ protected:
 	virtual void On_Activation() = 0;
 
 	EMonster_State Monster_State;
+	bool Need_To_Freeze;
 	int Next_Direction_Switch_Tick;
 	int Alive_Timer_Tick;
 	double X_Pos, Y_Pos;
@@ -66,7 +68,7 @@ private:
 	void Redraw_Monster();
 	void Change_Direction();
 
-	double Speed;
+	double Speed, Prev_Speed;
 	std::vector<AExplosive_Ball> Explosive_Balls;
 
 	static const int Explosive_Balls_Count = 20;

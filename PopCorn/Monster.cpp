@@ -7,7 +7,7 @@ AMonster::~AMonster()
 }
 //------------------------------------------------------------------------------------------------------------
 AMonster::AMonster()
-: Monster_State(EMonster_State::Missing), X_Pos(0), Y_Pos(0), Speed(0.0), Direction(0.0),
+: Monster_State(EMonster_State::Missing), Need_To_Freeze(false), X_Pos(0), Y_Pos(0), Speed(0.0), Prev_Speed(0.0), Direction(0.0),
   Next_Direction_Switch_Tick(0), Alive_Timer_Tick(0), Monster_Rect{}, Explosive_Balls(Explosive_Balls_Count)
 {
 }
@@ -83,7 +83,7 @@ void AMonster::Advance(double max_speed)
 	bool got_new_direction = false;
 	RECT monster_rect;
 
-	if (! (Monster_State == EMonster_State::Emitting || Monster_State == EMonster_State::Alive) )
+	if (! (Monster_State == EMonster_State::Emitting || Monster_State == EMonster_State::Alive) || Speed == 0.0)
 		return;
 
 	next_step = Speed / max_speed * AsConfig::Moving_Step_Size;
@@ -154,6 +154,13 @@ void AMonster::Act()
 
 
 	case EMonster_State::Alive:
+		if (Need_To_Freeze)
+		{
+			Prev_Speed = Speed;
+			Speed = 0.0;
+			Need_To_Freeze = false;
+		}
+
 		Act_Alive();
 		Change_Direction();
 		break;
@@ -283,6 +290,14 @@ void AMonster::Destroy()
 	Monster_State = EMonster_State::Destroing;
 
 	AsInfo_Panel::Update_Score(EScore_Event_Type::Hit_Monster);
+}
+//------------------------------------------------------------------------------------------------------------
+void AMonster::Set_Freeze_State(bool freeze)
+{
+	if (! freeze)
+		Speed = Prev_Speed;
+
+	Need_To_Freeze = freeze;
 }
 //------------------------------------------------------------------------------------------------------------
 void AMonster::Draw_Destroing(HDC hdc, RECT &paint_area)

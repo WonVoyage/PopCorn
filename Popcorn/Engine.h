@@ -37,15 +37,16 @@ public:
 	const int Timer_ID;
 
 private:
-	void Restart_Level();
+	bool Restart_Level();
 	void Play_Level();
+	void Game_Over();
 	void Advance_Movers();
 	void Act();
+	void Handle_Message();
 	void On_Falling_Letter(AFalling_Letter *falling_letter);
 
 	EGame_State Game_State;
 	double Rest_Distance;
-	int Life_Count;
 
 	AsLevel Level;
 	AsPlatform Platform;
