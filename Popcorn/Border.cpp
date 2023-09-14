@@ -19,11 +19,11 @@ AsBorder::AsBorder()
 	Floor_Rect.bottom = AsConfig::Max_Y_Pos * AsConfig::Global_Scale;
 
 	// Гейты
-	Gates.push_back(new AGate(1, 29, 0, 3) );
-	Gates.push_back(new AGate(AsConfig::Max_X_Pos, 29, AsConfig::Level_Width - 1, 3) );
+	Gates.push_back(new AGate(1, 28, 0, 3) );
+	Gates.push_back(new AGate(AsConfig::Max_X_Pos, 28, AsConfig::Level_Width - 1, 3) );
 
-	Gates.push_back(new AGate(1, 77, 0, 9) );
-	Gates.push_back(new AGate(AsConfig::Max_X_Pos, 77, AsConfig::Level_Width - 1, 9) );
+	Gates.push_back(new AGate(1, 76, 0, 9) );
+	Gates.push_back(new AGate(AsConfig::Max_X_Pos, 76, AsConfig::Level_Width - 1, 9) );
 
 	Gates.push_back(new AGate(1, 129) );
 	Gates.push_back(new AGate(AsConfig::Max_X_Pos, 129) );
@@ -60,6 +60,13 @@ int AsBorder::Long_Open_Gate()
 	AGate *gate;
 
 	gate_index = AsTools::Rand(Gates.size() );
+
+	//if (gate_index <= 3)
+	//	gate_index = 0;
+	//else
+	//	gate_index = 1;
+
+	//gate_index = 1;
 
 	for (i = 0; i < (int)Gates.size(); i++)
 	{

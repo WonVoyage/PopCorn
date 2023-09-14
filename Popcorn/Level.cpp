@@ -1,54 +1,33 @@
 ﻿#include "Level.h"
 
-char AsLevel::Level_01[AsConfig::Level_Height][AsConfig::Level_Width] =
+// APoint
+//------------------------------------------------------------------------------------------------------------
+APoint::APoint()
+: X(0), Y(0)
 {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
+}
+//------------------------------------------------------------------------------------------------------------
+APoint::APoint(int x, int y)
+: X(x), Y(y)
+{
+}
+//------------------------------------------------------------------------------------------------------------
 
-char AsLevel::Test_Level[AsConfig::Level_Height][AsConfig::Level_Width] =
-{
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
+
+
 
 // AsLevel
+//------------------------------------------------------------------------------------------------------------
 AsLevel *AsLevel::Level = 0;
 //------------------------------------------------------------------------------------------------------------
 AsLevel::~AsLevel()
 {
 	Cancel_All_Activity();
-
-	delete[] Teleport_Bricks_Pos;
 }
 //------------------------------------------------------------------------------------------------------------
 AsLevel::AsLevel()
-: Level_Rect{}, Need_To_Cancel_All(false), Teleport_Bricks_Count(0), Teleport_Bricks_Pos(0),
-  Parachute_Color(AsConfig::Red_Color, AsConfig::Blue_Color, AsConfig::Global_Scale), Advertisement(0)
+: Level_Rect{}, Need_To_Cancel_All(false), Parachute_Color(AsConfig::Red_Color, AsConfig::Blue_Color, AsConfig::Global_Scale),
+  Advertisement(0)
 {
 	Level = this;
 }
@@ -247,24 +226,38 @@ bool AsLevel::Is_Finished()
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Init()
 {
+	int i;
+	ALevel_Data *level_data;
+
 	Level_Rect.left = AsConfig::Level_X_Offset * AsConfig::Global_Scale;
 	Level_Rect.top = AsConfig::Level_Y_Offset * AsConfig::Global_Scale;
 	Level_Rect.right = Level_Rect.left + AsConfig::Cell_Width * AsConfig::Level_Width * AsConfig::Global_Scale;
 	Level_Rect.bottom = Level_Rect.top + AsConfig::Cell_Height * AsConfig::Level_Height * AsConfig::Global_Scale;
 
 	memset(Current_Level, 0, sizeof(Current_Level) );
+
+	for (i = 0; i < ALevel_Data::Max_Level_Number; i++)
+	{
+		level_data = new ALevel_Data(i + 1);
+		Levels_Data.push_back(level_data);
+	}
 }
 //------------------------------------------------------------------------------------------------------------
-void AsLevel::Set_Current_Level(char level[AsConfig::Level_Height][AsConfig::Level_Width])
+void AsLevel::Set_Current_Level(int level_number)
 {
 	int i, j;
-	int index;
 	EBrick_Type brick_type;
+	ALevel_Data *level_data;
 
-	memcpy(Current_Level, level, sizeof(Current_Level) );
+	if (level_number < 1 || level_number > (int)Levels_Data.size() )
+		AsConfig::Throw();
+
+	level_data = Levels_Data[level_number - 1];
+
+	memcpy(Current_Level, level_data->Level, sizeof(Current_Level) );
 
 	// 1. Считаем телепорты
-	Teleport_Bricks_Count = 0;
+	Teleport_Bricks_Pos.erase(Teleport_Bricks_Pos.begin(), Teleport_Bricks_Pos.end() );
 
 	for (i = 0; i < AsConfig::Level_Height; i++)
 	{
@@ -273,37 +266,12 @@ void AsLevel::Set_Current_Level(char level[AsConfig::Level_Height][AsConfig::Lev
 			brick_type = (EBrick_Type)Current_Level[i][j];
 
 			if (brick_type == EBrick_Type::Teleport)
-				++Teleport_Bricks_Count;
+				Teleport_Bricks_Pos.emplace_back(j, i);
 		}
 	}
 
-	delete[] Teleport_Bricks_Pos;
-	Teleport_Bricks_Pos = 0;
-
-	// 2. Сохраняем координаты телепортов
-	if (Teleport_Bricks_Count != 0)
-	{
-		if (Teleport_Bricks_Count == 1)
-			AsConfig::Throw();  // Телепортов должно быть больше 1!
-
-		Teleport_Bricks_Pos = new SPoint[Teleport_Bricks_Count];
-		index = 0;
-
-		for (i = 0; i < AsConfig::Level_Height; i++)
-		{
-			for (j = 0; j < AsConfig::Level_Width; j++)
-			{
-				brick_type = (EBrick_Type)Current_Level[i][j];
-
-				if (brick_type == EBrick_Type::Teleport)
-				{
-					Teleport_Bricks_Pos[index].X = j;
-					Teleport_Bricks_Pos[index].Y = i;
-					++index;
-				}
-			}
-		}
-	}
+	if (Teleport_Bricks_Pos.size() == 1)
+		AsConfig::Throw();  // Телепортов должно быть 0 либо больше 1!
 
 	Advertisement = new AAdvertisement(9, 6, 2, 3);
 }
@@ -351,6 +319,7 @@ bool AsLevel::Has_Brick_At(RECT &monster_rect)
 	int y_step = AsConfig::Cell_Height * AsConfig::Global_Scale;
 	int min_level_x, max_level_x;
 	int min_level_y, max_level_y;
+	int min_cell_x, min_cell_y;
 
 	min_level_x = (monster_rect.left - level_x_offs) / x_step;
 	max_level_x = (monster_rect.right - level_x_offs) / x_step;
@@ -358,8 +327,33 @@ bool AsLevel::Has_Brick_At(RECT &monster_rect)
 	min_level_y = (monster_rect.top - level_y_offs) / y_step;
 	max_level_y = (monster_rect.bottom - level_y_offs) / y_step;
 
+	// Т.к. ячейка уровня больше кипича (хотя и начинается в одинаковых с кирпичом координатах),
+	// то она имеет правую и нижнюю пустую полосу, в которой может находиться монстр.
+	// Игнорируем ряд (или столбец) кирпичей, если монстр попал в ячейку но не попал в кирпич.
+
+	min_cell_x = min_level_x * y_step + level_x_offs;
+	min_cell_y = min_level_y * y_step + level_y_offs;
+
+	if (monster_rect.left - min_cell_x > AsConfig::Brick_Width * AsConfig::Global_Scale)
+		++min_level_x;
+
+	if (monster_rect.top - min_cell_y > AsConfig::Brick_Height * AsConfig::Global_Scale)
+		++min_level_y;
+
+	if (min_level_x >= AsConfig::Level_Width)
+		min_level_x = AsConfig::Level_Width - 1;
+
+	if (max_level_x >= AsConfig::Level_Width)
+		max_level_x = AsConfig::Level_Width - 1;
+
+	if (min_level_y >= AsConfig::Level_Height)
+		min_level_y = AsConfig::Level_Height - 1;
+
+	if (max_level_y >= AsConfig::Level_Height)
+		max_level_y = AsConfig::Level_Height - 1;
+
 	for (i = min_level_y; i <= max_level_y; i++)
-		for (j = min_level_y; j <= max_level_y; j++)
+		for (j = min_level_x; j <= max_level_x; j++)
 			if (Has_Brick_At(j, i) )
 				return true;
 
@@ -604,20 +598,20 @@ AActive_Brick_Teleport *AsLevel::Select_Destination_Teleport(int source_x, int s
 
 	AActive_Brick_Teleport *destination_teleport;
 
-	if (Teleport_Bricks_Count < 2)
+	if (Teleport_Bricks_Pos.size() < 2)
 	{
 		AsConfig::Throw();
 		return 0;
 	}
 
-	dest_index = AsTools::Rand(Teleport_Bricks_Count);
+	dest_index = AsTools::Rand(Teleport_Bricks_Pos.size() );
 
 	if (Teleport_Bricks_Pos[dest_index].X == source_x && Teleport_Bricks_Pos[dest_index].Y == source_y)
 	{// Если случайно выбрали текущий телепорт - переходим к следующему
 
 		++dest_index;
 
-		if (dest_index >= Teleport_Bricks_Count)
+		if (dest_index >= (int)Teleport_Bricks_Pos.size() )
 			dest_index = 0;  // Переходим на начало массива, если вышли за его пределы
 	}
 

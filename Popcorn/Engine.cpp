@@ -42,7 +42,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 
 	AsPlatform::Hit_Checker_List.Add_Hit_Checker(&Monster_Set);
 
-	Level.Set_Current_Level(AsLevel::Level_01);
+	Level.Set_Current_Level(ALevel_Data::Max_Level_Number);
 
 	//Ball.Set_State(EBall_State::Normal, Platform.X_Pos + Platform.Width / 2);
 	//Platform.Set_State(EPS_Normal);

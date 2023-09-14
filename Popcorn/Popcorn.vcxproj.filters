@@ -103,6 +103,9 @@
     <Filter Include="#Screen\Indicator">
       <UniqueIdentifier>{593db298-3e56-4926-b37d-3e385a354963}</UniqueIdentifier>
     </Filter>
+    <Filter Include="#Screen\Level_Data">
+      <UniqueIdentifier>{a48ae110-d05f-4765-a32f-2df41535c8ac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -182,6 +185,9 @@
     </ClInclude>
     <ClInclude Include="Indicator.h">
       <Filter>#Screen\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="Level_Data.h">
+      <Filter>#Screen\Level_Data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -266,6 +272,9 @@
     </ClCompile>
     <ClCompile Include="Indicator.cpp">
       <Filter>#Screen\Indicator</Filter>
+    </ClCompile>
+    <ClCompile Include="Level_Data.cpp">
+      <Filter>#Screen\Level_Data</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
