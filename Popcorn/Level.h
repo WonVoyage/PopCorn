@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Falling_Letter.h"
+#include "Info_Panel.h"
 
 //------------------------------------------------------------------------------------------------------------
 struct SPoint
@@ -63,8 +64,6 @@ private:
 	AColor Parachute_Color;
 
 	char Current_Level[AsConfig::Level_Height][AsConfig::Level_Width];
-	//int Active_Bricks_Count;
-	//AActive_Brick *Active_Bricks[AsConfig::Max_Active_Bricks_Count];
 	std::vector<AGraphics_Object *> Active_Bricks;
 	std::vector<AGraphics_Object *> Falling_Letters;
 	int Teleport_Bricks_Count;

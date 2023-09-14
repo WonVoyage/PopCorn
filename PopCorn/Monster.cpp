@@ -281,6 +281,8 @@ void AMonster::Destroy()
 	}
 
 	Monster_State = EMonster_State::Destroing;
+
+	AsInfo_Panel::Update_Score(EScore_Event_Type::Hit_Monster);
 }
 //------------------------------------------------------------------------------------------------------------
 void AMonster::Draw_Destroing(HDC hdc, RECT &paint_area)

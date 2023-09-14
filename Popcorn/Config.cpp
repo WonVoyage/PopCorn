@@ -91,8 +91,6 @@ HBRUSH AColor::Get_Brush() const
 // AsConfig
 bool AsConfig::Level_Has_Floor = false;
 int AsConfig::Current_Timer_Tick = 0;
-int AsConfig::Score = 0;
-int AsConfig::Extra_Lives_Count = 5;
 
 const AColor AsConfig::BG_Color(15, 63, 31);
 const AColor AsConfig::Red_Color(255, 85, 85);
