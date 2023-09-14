@@ -6,6 +6,7 @@
 #include "Ball_Set.h"
 #include "Monster_Set.h"
 #include "Info_Panel.h"
+#include <vector>
 
 //------------------------------------------------------------------------------------------------------------
 enum class EKey_Type: unsigned char
@@ -42,7 +43,6 @@ private:
 	void Advance_Movers();
 	void Act();
 	void On_Falling_Letter(AFalling_Letter *falling_letter);
-	void Add_Next_Module(int &index, AGame_Object *game_obj);
 
 	EGame_State Game_State;
 	double Rest_Distance;
@@ -56,9 +56,6 @@ private:
 	AsMonster_Set Monster_Set;
 	AsInfo_Panel Info_Panel;
 
-	//AMover *Movers[AsConfig::Max_Movers_Count];  // UNO; Движущиеся в данный момент объекты
-	//AGraphics_Object *Modules[AsConfig::Max_Modules_Count];  // UNO; Главные графические объекты (модули) игры
-
-	AGame_Object *Modules[AsConfig::Max_Modules_Count];  // UNO; Главные графические объекты (модули) игры
+	std::vector<AGame_Object *> Modules;  // UNO; Главные графические объекты (модули) игры
 };
 //------------------------------------------------------------------------------------------------------------
