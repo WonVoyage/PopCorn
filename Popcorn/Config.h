@@ -3,6 +3,31 @@
 #include "Common.h"
 
 //------------------------------------------------------------------------------------------------------------
+class AColor
+{
+public:
+	~AColor();
+	AColor();
+	AColor(unsigned char r, unsigned char g, unsigned char b);
+	AColor(const AColor &color, int pen_size);
+	AColor(unsigned char r, unsigned char g, unsigned char b, int pen_size);
+	AColor(const AColor &pen_color, const AColor &brush_color, int pen_size);
+
+	void operator = (const AColor &another);
+
+	void Set_As(unsigned char r, unsigned char g, unsigned char b);
+	int Get_RGB() const;
+	void Select(HDC hdc) const;
+	void Select_Pen(HDC hdc) const;
+	HBRUSH Get_Brush() const;
+
+	unsigned char R, G, B;
+
+private:
+	HPEN Pen;
+	HBRUSH Brush;
+};
+//------------------------------------------------------------------------------------------------------------
 class AsConfig
 {
 public:
@@ -47,7 +72,6 @@ public:
 	static const int Max_Falling_Letters_Count = 10;
 	static const int Max_Balls_Count = 10;
 	static const int Max_Movers_Count = 10;
-	//static const int Max_Modules_Count = 10;
 	static const int Initial_Life_Count = 5;
 	static const int Max_Life_Count = 12;
 	static const int Floor_Y_Pos = Max_Y_Pos - 1;
@@ -88,13 +112,13 @@ class AHit_Checker_List
 public:
 	AHit_Checker_List();
 
-	bool Add_Hit_Checker(AHit_Checker *hit_checker);
+	void Add_Hit_Checker(AHit_Checker *hit_checker);
 	bool Check_Hit(double x_pos, double y_pos, ABall_Object *ball);
 	bool Check_Hit(double x_pos, double y_pos);
 	bool Check_Hit(RECT &rect);
 
 private:
 	int Hit_Checkers_Count;
-	AHit_Checker *Hit_Checkers[4];
+	std::vector<AHit_Checker *> Hit_Checkers;
 };
 //------------------------------------------------------------------------------------------------------------

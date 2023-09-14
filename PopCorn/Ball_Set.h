@@ -6,6 +6,8 @@
 class AsBall_Set: public AGame_Objects_Set
 {
 public:
+	AsBall_Set();
+
 	virtual void Act();
 
 	void Release_From_Platform(double platform_x_pos);
@@ -21,8 +23,9 @@ public:
 	void On_Platform_Advance(double direction, double platform_speed, double max_speed);
 
 private:
+	void Turn_Tripled_Ball(ABall *ball, bool add_min_angle);
 	virtual bool Get_Next_Game_Object(int &index, AGame_Object **game_obj);
 
-	ABall Balls[AsConfig::Max_Balls_Count];
+	std::vector<ABall> Balls;
 };
 //------------------------------------------------------------------------------------------------------------

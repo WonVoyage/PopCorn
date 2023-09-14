@@ -4,14 +4,14 @@
 //------------------------------------------------------------------------------------------------------------
 AsBorder::~AsBorder()
 {
-	int i;
+	for (auto *gate : Gates)
+		delete gate;
 
-	for (i = 0; i < AsConfig::Gates_Count; i++)
-		delete Gates[i];
+	Gates.erase(Gates.begin(), Gates.end() );
 }
 //------------------------------------------------------------------------------------------------------------
 AsBorder::AsBorder()
-: Floor_Rect{}, Gates{}
+: Floor_Rect{}
 {
 	Floor_Rect.left = AsConfig::Level_X_Offset * AsConfig::Global_Scale;
 	Floor_Rect.top = AsConfig::Floor_Y_Pos * AsConfig::Global_Scale;
@@ -19,17 +19,20 @@ AsBorder::AsBorder()
 	Floor_Rect.bottom = AsConfig::Max_Y_Pos * AsConfig::Global_Scale;
 
 	// Гейты
-	Gates[0] = new AGate(1, 29, 0, 3);
-	Gates[1] = new AGate(AsConfig::Max_X_Pos, 29, AsConfig::Level_Width - 1, 3);
+	Gates.push_back(new AGate(1, 29, 0, 3) );
+	Gates.push_back(new AGate(AsConfig::Max_X_Pos, 29, AsConfig::Level_Width - 1, 3) );
 
-	Gates[2] = new AGate(1, 77, 0, 9);
-	Gates[3] = new AGate(AsConfig::Max_X_Pos, 77, AsConfig::Level_Width - 1, 9);
+	Gates.push_back(new AGate(1, 77, 0, 9) );
+	Gates.push_back(new AGate(AsConfig::Max_X_Pos, 77, AsConfig::Level_Width - 1, 9) );
 
-	Gates[4] = new AGate(1, 129);
-	Gates[5] = new AGate(AsConfig::Max_X_Pos, 129);
+	Gates.push_back(new AGate(1, 129) );
+	Gates.push_back(new AGate(AsConfig::Max_X_Pos, 129) );
 
-	Gates[6] = new AGate(1, 178);
-	Gates[7] = new AGate(AsConfig::Max_X_Pos, 178);
+	Gates.push_back(new AGate(1, 178) );
+	Gates.push_back(new AGate(AsConfig::Max_X_Pos, 178) );
+
+	if (Gates.size() != AsConfig::Gates_Count)
+		AsConfig::Throw();
 }
 //------------------------------------------------------------------------------------------------------------
 void AsBorder::Redraw_Floor()
@@ -39,10 +42,10 @@ void AsBorder::Redraw_Floor()
 //------------------------------------------------------------------------------------------------------------
 void AsBorder::Open_Gate(int gate_index, bool short_open)
 {
-	if (gate_index != AsConfig::Gates_Count - 1 && short_open)
-		AsConfig::Throw();
+	if (gate_index != Gates.size() - 1 && short_open)
+		AsConfig::Throw();  // Платформу можно выкатывать только из правого нижнего гейта
 
-	if (gate_index >= 0 && gate_index < AsConfig::Gates_Count)
+	if (gate_index >= 0 && gate_index < (int)Gates.size() )
 		Gates[gate_index]->Open_Gate(short_open);
 	else
 		AsConfig::Throw();
@@ -55,13 +58,13 @@ int AsBorder::Long_Open_Gate()
 	bool got_gate = false;
 	AGate *gate;
 
-	gate_index = AsTools::Rand(AsConfig::Gates_Count);
+	gate_index = AsTools::Rand(Gates.size() );
 
-	for (i = 0; i < AsConfig::Gates_Count; i++)
+	for (i = 0; i < (int)Gates.size(); i++)
 	{
 		gate = Gates[gate_index];
 
-		if (gate_index != AsConfig::Gates_Count - 1)  // Гейт, из которого выкатывается платформа, не выпускает монстров
+		if (gate_index != Gates.size() - 1)  // Гейт, из которого выкатывается платформа, не выпускает монстров
 			if (gate->Is_Closed() )
 			{
 				if (gate->Level_X_Pos == -1)
@@ -80,7 +83,7 @@ int AsBorder::Long_Open_Gate()
 
 		++gate_index;
 
-		if (gate_index >= AsConfig::Gates_Count)
+		if (gate_index >= (int)Gates.size() )
 			gate_index = 0;
 	}
 
@@ -94,7 +97,7 @@ int AsBorder::Long_Open_Gate()
 //------------------------------------------------------------------------------------------------------------
 bool AsBorder::Is_Gate_Opened(int gate_index)
 {
-	if (gate_index >= 0 && gate_index < AsConfig::Gates_Count)
+	if (gate_index >= 0 && gate_index < (int)Gates.size() )
 		return Gates[gate_index]->Is_Opened();
 	else
 	{
@@ -105,7 +108,7 @@ bool AsBorder::Is_Gate_Opened(int gate_index)
 //------------------------------------------------------------------------------------------------------------
 bool AsBorder::Is_Gate_Closed(int gate_index)
 {
-	if (gate_index >= 0 && gate_index < AsConfig::Gates_Count)
+	if (gate_index >= 0 && gate_index < (int)Gates.size() )
 		return Gates[gate_index]->Is_Closed();
 	else
 	{
@@ -116,7 +119,7 @@ bool AsBorder::Is_Gate_Closed(int gate_index)
 //------------------------------------------------------------------------------------------------------------
 void AsBorder::Get_Gate_Pos(int gate_index, int &gate_x_pos, int &gate_y_pos)
 {
-	if (gate_index >= 0 && gate_index < AsConfig::Gates_Count)
+	if (gate_index >= 0 && gate_index < (int)Gates.size() )
 		Gates[gate_index]->Get_Pos(gate_x_pos, gate_y_pos);
 	else
 		AsConfig::Throw();
@@ -184,20 +187,17 @@ double AsBorder::Get_Speed()
 //------------------------------------------------------------------------------------------------------------
 void AsBorder::Act()
 {
-	int i;
-
-	for (i = 0; i < AsConfig::Gates_Count; i++)
-		Gates[i]->Act();
+	for (auto *gate : Gates)
+		gate->Act();
 }
 //------------------------------------------------------------------------------------------------------------
 void AsBorder::Clear(HDC hdc, RECT &paint_area)
 {
-	int i;
 	RECT intersection_rect;
 
 	// 1. Стираем гейты
-	for (i = 0; i < AsConfig::Gates_Count; i++)
-		Gates[i]->Clear(hdc, paint_area);
+	for (auto *gate : Gates)
+		gate->Clear(hdc, paint_area);
 
 	// 2. Стираем пол (если надо)
 	if (! AsConfig::Level_Has_Floor)
@@ -231,8 +231,8 @@ void AsBorder::Draw(HDC hdc, RECT &paint_area)
 		Draw_Floor(hdc, paint_area);
 
 	// 5. Гейты
-	for (i = 0; i < AsConfig::Gates_Count; i++)
-		Gates[i]->Draw(hdc, paint_area);
+	for (auto *gate : Gates)
+		gate->Draw(hdc, paint_area);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsBorder::Is_Finished()
@@ -243,7 +243,6 @@ bool AsBorder::Is_Finished()
 void AsBorder::Draw_Element(HDC hdc, RECT &paint_area, int x, int y, bool top_border)
 {// Рисует элемент рамки уровня
 
-	int i;
 	int gate_top_y, gate_low_y;
 	RECT intersection_rect, rect;
 
@@ -254,9 +253,9 @@ void AsBorder::Draw_Element(HDC hdc, RECT &paint_area, int x, int y, bool top_bo
 
 	if (! top_border)
 	{
-		for (i = 0; i < AsConfig::Gates_Count; i++)
+		for (auto *gate : Gates)
 		{
-			Gates[i]->Get_Y_Size(gate_top_y, gate_low_y);
+			gate->Get_Y_Size(gate_top_y, gate_low_y);
 
 			if (rect.top >= gate_top_y && rect.bottom <= gate_low_y)
 				return;  // Гейт целиком перекроет элемент рамки

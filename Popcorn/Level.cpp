@@ -310,7 +310,7 @@ void AsLevel::Set_Current_Level(char level[AsConfig::Level_Height][AsConfig::Lev
 //------------------------------------------------------------------------------------------------------------
 bool AsLevel::Get_Next_Falling_Letter(int &index, AFalling_Letter **falling_letter)
 {
-	if (index < Falling_Letters.size() )
+	if (index < (int)Falling_Letters.size() )
 	{
 		*falling_letter = (AFalling_Letter *)Falling_Letters[index++];
 		return true;
@@ -429,15 +429,15 @@ bool AsLevel::Add_Falling_Letter(int brick_x, int brick_y, EBrick_Type brick_typ
 	switch (AsTools::Rand(3) )
 	{
 	case 0:
-		letter_type = ELetter_Type::L;
+		letter_type = ELetter_Type::T;
 		break;
 
 	case 1:
-		letter_type = ELetter_Type::K;
+		letter_type = ELetter_Type::T;
 		break;
 
 	case 2:
-		letter_type = ELetter_Type::W;
+		letter_type = ELetter_Type::T;
 		break;
 	}
 
@@ -770,7 +770,9 @@ void AsLevel::Delete_Objects(std::vector<AGraphics_Object *> &falling_letters)
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Act_Objects(std::vector<AGraphics_Object *> &falling_letters)
 {
-	for (auto it = falling_letters.begin(); it != falling_letters.end(); it++)
+	auto it = falling_letters.begin();
+
+	while (it != falling_letters.end() )
 	{
 		(*it)->Act();
 
@@ -779,6 +781,8 @@ void AsLevel::Act_Objects(std::vector<AGraphics_Object *> &falling_letters)
 			delete *it;
 			it = falling_letters.erase(it);
 		}
+		else
+			it++;
 	}
 }
 //------------------------------------------------------------------------------------------------------------

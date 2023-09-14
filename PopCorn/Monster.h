@@ -67,10 +67,9 @@ private:
 	void Change_Direction();
 
 	double Speed;
+	std::vector<AExplosive_Ball> Explosive_Balls;
 
 	static const int Explosive_Balls_Count = 20;
-
-	AExplosive_Ball Explosive_Balls[Explosive_Balls_Count];
 };
 //------------------------------------------------------------------------------------------------------------
 class AMonster_Eye: public AMonster
@@ -87,10 +86,9 @@ private:
 	double Cornea_Height;
 	int Start_Blink_Timeout, Total_Animation_Timeout;
 
+	std::vector<int> Blink_Ticks;
+
 	static const int Blink_Stages_Count = 7;
-
-	int Blink_Ticks[Blink_Stages_Count];
-
 	static const double Max_Cornea_Height;
 	static const double Blink_Timeouts[Blink_Stages_Count];
 	static const EEye_State Blink_States[Blink_Stages_Count];

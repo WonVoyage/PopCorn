@@ -1,5 +1,93 @@
 ﻿#include "Config.h"
 
+// AColor
+//------------------------------------------------------------------------------------------------------------
+AColor::~AColor()
+{
+	if (Pen != 0)
+		DeleteObject(Pen);
+
+	if (Brush != 0)
+		DeleteObject(Brush);
+}
+//------------------------------------------------------------------------------------------------------------
+AColor::AColor()
+	: R(0), G(0), B(0), Pen(0), Brush(0)
+{
+}
+//------------------------------------------------------------------------------------------------------------
+AColor::AColor(unsigned char r, unsigned char g, unsigned char b)
+	: R(r), G(g), B(b), Pen(0), Brush(0)
+{
+	Pen = CreatePen(PS_SOLID, 0, RGB(r, g, b) );
+	Brush = CreateSolidBrush(RGB(r, g, b) );
+}
+//------------------------------------------------------------------------------------------------------------
+AColor::AColor(const AColor &color, int pen_size)
+	: R(color.R), G(color.G), B(color.B), Pen(0), Brush(0)
+{
+	Pen = CreatePen(PS_SOLID, pen_size, color.Get_RGB() );
+}
+//------------------------------------------------------------------------------------------------------------
+AColor::AColor(unsigned char r, unsigned char g, unsigned char b, int pen_size)
+	: R(r), G(g), B(b), Pen(0), Brush(0)
+{
+	Pen = CreatePen(PS_SOLID, pen_size, RGB(r, g, b) );
+}
+//------------------------------------------------------------------------------------------------------------
+AColor::AColor(const AColor &pen_color, const AColor &brush_color, int pen_size)
+	: R(0), G(0), B(0), Pen(0), Brush(0)
+{
+	Pen = CreatePen(PS_SOLID, pen_size, pen_color.Get_RGB() );
+	Brush = CreateSolidBrush(brush_color.Get_RGB() );
+}
+//------------------------------------------------------------------------------------------------------------
+void AColor::operator = (const AColor &another)
+{
+	AsConfig::Throw();  // При присваивании нужно создать копии карандаша и кисти. Вместо этого следует их пересоздать методом Set_As().
+}
+//------------------------------------------------------------------------------------------------------------
+void AColor::Set_As(unsigned char r, unsigned char g, unsigned char b)
+{
+	R = r;
+	G = g;
+	B = b;
+
+	if (Pen != 0)
+		DeleteObject(Pen);
+
+	if (Brush != 0)
+		DeleteObject(Brush);
+
+	Pen = CreatePen(PS_SOLID, 0, RGB(R, G, B) );
+	Brush = CreateSolidBrush(RGB(R, G, B) );
+}
+//------------------------------------------------------------------------------------------------------------
+int AColor::Get_RGB() const
+{
+	return RGB(R, G, B);
+}
+//------------------------------------------------------------------------------------------------------------
+void AColor::Select(HDC hdc) const
+{
+	SelectObject(hdc, Pen);
+	SelectObject(hdc, Brush);
+}
+//------------------------------------------------------------------------------------------------------------
+void AColor::Select_Pen(HDC hdc) const
+{
+	SelectObject(hdc, Pen);
+}
+//------------------------------------------------------------------------------------------------------------
+HBRUSH AColor::Get_Brush() const
+{
+	return Brush;
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
 // AsConfig
 bool AsConfig::Level_Has_Floor = false;
 int AsConfig::Current_Timer_Tick = 0;
@@ -98,7 +186,7 @@ void AsTools::Get_Fading_Color(const AColor &origin_color, int step, AColor &res
 	g = Get_Fading_Channel(origin_color.G, AsConfig::BG_Color.G, step, max_step);
 	b = Get_Fading_Channel(origin_color.B, AsConfig::BG_Color.B, step, max_step);
 
-	result_color = AColor(r, g, b);
+	result_color.Set_As(r, g, b);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsTools::Reflect_On_Circle(double next_x_pos, double next_y_pos, double circle_x, double circle_y, double circle_radius, ABall_Object *ball)
@@ -189,26 +277,19 @@ bool AHit_Checker::Check_Hit(RECT &rect)
 // AHit_Checker_List
 //------------------------------------------------------------------------------------------------------------
 AHit_Checker_List::AHit_Checker_List()
-	: Hit_Checkers_Count(0), Hit_Checkers{}
+: Hit_Checkers_Count(0), Hit_Checkers{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
-bool AHit_Checker_List::Add_Hit_Checker(AHit_Checker *hit_checker)
+void AHit_Checker_List::Add_Hit_Checker(AHit_Checker *hit_checker)
 {
-	if (Hit_Checkers_Count >= sizeof(Hit_Checkers) / sizeof(Hit_Checkers[0]) )
-		AsConfig::Throw();
-
-	Hit_Checkers[Hit_Checkers_Count++] = hit_checker;
-
-	return true;
+	Hit_Checkers.push_back(hit_checker);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AHit_Checker_List::Check_Hit(double x_pos, double y_pos, ABall_Object *ball)
 {
-	int i;
-
-	for (i = 0; i < Hit_Checkers_Count; i++)
-		if (Hit_Checkers[i]->Check_Hit(x_pos, y_pos, ball) )
+	for (auto *hit_checker : Hit_Checkers)
+		if (hit_checker->Check_Hit(x_pos, y_pos, ball) )
 			return true;
 
 	return false;
@@ -216,10 +297,8 @@ bool AHit_Checker_List::Check_Hit(double x_pos, double y_pos, ABall_Object *ball
 //------------------------------------------------------------------------------------------------------------
 bool AHit_Checker_List::Check_Hit(double x_pos, double y_pos)
 {
-	int i;
-
-	for (i = 0; i < Hit_Checkers_Count; i++)
-		if (Hit_Checkers[i]->Check_Hit(x_pos, y_pos) )
+	for (auto *hit_checker : Hit_Checkers)
+		if (hit_checker->Check_Hit(x_pos, y_pos) )
 			return true;
 
 	return false;
@@ -227,10 +306,8 @@ bool AHit_Checker_List::Check_Hit(double x_pos, double y_pos)
 //------------------------------------------------------------------------------------------------------------
 bool AHit_Checker_List::Check_Hit(RECT &rect)
 {
-	int i;
-
-	for (i = 0; i < Hit_Checkers_Count; i++)
-		if (Hit_Checkers[i]->Check_Hit(rect) )
+	for (auto *hit_checker : Hit_Checkers)
+		if (hit_checker->Check_Hit(rect) )
 			return true;
 
 	return false;

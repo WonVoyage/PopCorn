@@ -5,6 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <string>
+#include <vector>
 
 //------------------------------------------------------------------------------------------------------------
 enum class EBall_State: unsigned char
@@ -54,28 +55,6 @@ public:
 	virtual void Clear(HDC hdc, RECT &paint_area) = 0;
 	virtual void Draw(HDC hdc, RECT &paint_area) = 0;
 	virtual bool Is_Finished() = 0;
-};
-//------------------------------------------------------------------------------------------------------------
-class AColor
-{
-public:
-	~AColor();
-	AColor();
-	AColor(unsigned char r, unsigned char g, unsigned char b);
-	AColor(const AColor &color, int pen_size);
-	AColor(unsigned char r, unsigned char g, unsigned char b, int pen_size);
-	AColor(const AColor &pen_color, const AColor &brush_color, int pen_size);
-
-	int Get_RGB() const;
-	void Select(HDC hdc) const;
-	void Select_Pen(HDC hdc) const;
-	HBRUSH Get_Brush() const;
-
-	unsigned char R, G, B;
-
-private:
-	HPEN Pen;
-	HBRUSH Brush;
 };
 //------------------------------------------------------------------------------------------------------------
 class AGame_Object: public AMover, public AGraphics_Object
