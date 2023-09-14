@@ -1,9 +1,118 @@
 ﻿#include "Engine.h"
 
+// AsInfo_Panel
+//------------------------------------------------------------------------------------------------------------
+AsInfo_Panel::AsInfo_Panel()
+: Logo_Pop_Font(0), Logo_Corn_Font(0)
+{
+	LOGFONT log_font{};
+
+	log_font.lfHeight = -128;
+	log_font.lfWeight = 900;
+	log_font.lfOutPrecision = 3;
+	log_font.lfClipPrecision = 2;
+	log_font.lfQuality = 1;
+	log_font.lfPitchAndFamily = 34;
+	wcscpy_s(log_font.lfFaceName, L"Arial Black");
+
+	Logo_Pop_Font = CreateFontIndirect(&log_font);
+
+	log_font.lfHeight = -96;
+	Logo_Corn_Font = CreateFontIndirect(&log_font);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsInfo_Panel::Begin_Movement()
+{
+	//!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+void AsInfo_Panel::Finish_Movement()
+{
+	//!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+void AsInfo_Panel::Advance(double max_speed)
+{
+	//!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+double AsInfo_Panel::Get_Speed()
+{
+	return 0.0;  //!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+void AsInfo_Panel::Act()
+{
+	//!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+void AsInfo_Panel::Clear(HDC hdc, RECT &paint_area)
+{
+	//!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+void AsInfo_Panel::Draw(HDC hdc, RECT &paint_area)
+{
+	const int scale = AsConfig::Global_Scale;
+	int logo_x_pos = 212 * scale;
+	int logo_y_pos = 0;
+	int shadow_x_offset = 5 * scale;
+	int shadow_y_offset = 5 * scale;
+	const wchar_t *pop_str = L"POP";
+	const wchar_t *corn_str = L"CORN";
+
+	// 1. Логотип
+	AsTools::Rect(hdc, 211, 5, 104, 100, AsConfig::Blue_Color);
+
+	SetBkMode(hdc, TRANSPARENT);
+
+	// 1.1. "POP"
+	SelectObject(hdc, Logo_Pop_Font);
+	SetTextColor(hdc, AsConfig::BG_Color.Get_RGB() );
+	TextOut(hdc, logo_x_pos + shadow_x_offset, logo_y_pos + shadow_y_offset, pop_str, 3);
+
+	SetTextColor(hdc, AsConfig::Red_Color.Get_RGB() );
+	TextOut(hdc, logo_x_pos, logo_y_pos, pop_str, 3);
+
+
+	// 1.2. "CORN"
+	SelectObject(hdc, Logo_Corn_Font);
+	SetTextColor(hdc, AsConfig::BG_Color.Get_RGB() );
+	TextOut(hdc, logo_x_pos + shadow_x_offset - 5 * scale, logo_y_pos + shadow_y_offset + 48 * scale, corn_str, 4);
+
+	SetTextColor(hdc, AsConfig::Red_Color.Get_RGB() );
+	TextOut(hdc, logo_x_pos - 5 * scale, logo_y_pos + 48 * scale, corn_str, 4);
+
+	// 2. Таблица счёта
+	AsTools::Rect(hdc, 208, 108, 110, 90, AsConfig::Red_Color);
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsInfo_Panel::Is_Finished()
+{
+	return false;  //!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+void AsInfo_Panel::Choose_Font()
+{
+	CHOOSEFONT cf{};
+	LOGFONT lf{};
+
+	cf.lStructSize = sizeof(CHOOSEFONT);
+	cf.lpLogFont = &lf;
+	cf.Flags = CF_SCREENFONTS;
+	cf.nFontType = SCREEN_FONTTYPE;
+
+	ChooseFont(&cf);
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
 // AsEngine
 //------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
-: Game_State(EGame_State::Lost_Ball), Rest_Distance(0.0), Life_Count(AsConfig::Initial_Life_Count), Modules{}
+: Timer_ID(WM_USER + 1), Game_State(EGame_State::Lost_Ball), Rest_Distance(0.0), Life_Count(AsConfig::Initial_Life_Count), Modules{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -61,6 +170,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 	Add_Next_Module(index, &Ball_Set);
 	Add_Next_Module(index, &Laser_Beam_Set);
 	Add_Next_Module(index, &Monster_Set);
+	Add_Next_Module(index, &Info_Panel);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
