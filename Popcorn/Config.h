@@ -13,7 +13,8 @@ public:
 	static const AColor BG_Color, Red_Color, Blue_Color, White_Color, Letter_Color, Laser_Color, Gate_Color;
 	static const AColor Unbreakable_Blue_Highlight, Unbreakable_Red_Highlight, Teleport_Portal_Color;
 	static const AColor Advertisement_Blue_Table, Advertisement_Red_Table;
-	static const AColor Monster_Dark_Red_Color, Monster_Cornea_Color, Monster_Iris_Color, BG_Outline_Color, Explosion_Red_Color, Explosion_Blue_Color;
+	static const AColor Monster_Dark_Red_Color, Monster_Cornea_Color, Monster_Iris_Color, Monster_Comet_Tail;
+	static const AColor BG_Outline_Color, Explosion_Red_Color, Explosion_Blue_Color;
 	static HWND Hwnd;
 
 	static const double D_Global_Scale;
