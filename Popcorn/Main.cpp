@@ -4,44 +4,101 @@
 #include "framework.h"
 #include "Main.h"
 
-#define MAX_LOADSTRING 100
+// AsFrame_DC
+//------------------------------------------------------------------------------------------------------------
+AsFrame_DC::~AsFrame_DC()
+{
+	if (Bitmap != 0)
+		DeleteObject(Bitmap);
+
+	if (DC != 0)
+		DeleteObject(DC);
+}
+//------------------------------------------------------------------------------------------------------------
+AsFrame_DC::AsFrame_DC()
+: Width(0), Height(0), DC(0), Bitmap(0)
+{
+}
+//------------------------------------------------------------------------------------------------------------
+HDC AsFrame_DC::Get_DC(HWND hwnd, HDC hdc)
+{
+	int dc_width, dc_height;
+	RECT rect;
+
+	GetClientRect(hwnd, &rect);
+
+	dc_width = rect.right - rect.left;
+	dc_height = rect.bottom - rect.top;
+
+	if (dc_width != Width && dc_height != Height)
+	{
+		if (Bitmap != 0)
+			DeleteObject(Bitmap);
+
+		if (DC != 0)
+			DeleteObject(DC);
+
+		Width = dc_width;
+		Height = dc_height;
+
+		DC = CreateCompatibleDC(hdc);
+		Bitmap = CreateCompatibleBitmap(hdc, Width, Height);
+		SelectObject(DC, Bitmap);
+
+		AsTools::Rect(DC, rect, AsConfig::BG_Color);
+	}
+
+	return DC;
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
 
 // Global Variables:
-AsEngine Engine;
-HINSTANCE hInst;                                // current instance
-WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
-WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
-
-// Forward declarations of functions included in this code module:
-ATOM MyRegisterClass(HINSTANCE hInstance);
-BOOL InitInstance(HINSTANCE, int);
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+AsMain_Window Main_Window;
 //------------------------------------------------------------------------------------------------------------
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(lpCmdLine);
+	return Main_Window.Main(hInstance, nCmdShow);
+}
+//------------------------------------------------------------------------------------------------------------
 
-	// TODO: Place code here.
+
+
+
+// AsMain_Window
+AsMain_Window *AsMain_Window::Self = 0;
+//------------------------------------------------------------------------------------------------------------
+AsMain_Window::AsMain_Window()
+: Instance(0), szTitle{}, szWindowClass{}
+{
+	Self = this;
+}
+//------------------------------------------------------------------------------------------------------------
+int APIENTRY AsMain_Window::Main(HINSTANCE instance, int command_show)
+{
+	HACCEL accel_table;
+	MSG msg;
+
+	Instance = instance; // Store instance handle in our global variable
 
 	// Initialize global strings
-	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadStringW(hInstance, IDC_POPCORN, szWindowClass, MAX_LOADSTRING);
-	MyRegisterClass(hInstance);
+	LoadStringW(Instance, IDS_APP_TITLE, szTitle, Max_String_Size);
+	LoadStringW(Instance, IDC_POPCORN, szWindowClass, Max_String_Size);
+	Register_Class();
 
 	// Perform application initialization:
-	if (!InitInstance(hInstance, nCmdShow))
+	if (! Init_Instance(command_show))
 		return FALSE;
 
-	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_POPCORN));
+	accel_table = LoadAccelerators(Instance, MAKEINTRESOURCE(IDC_POPCORN));
 
-	MSG msg;
 
 	// Main message loop:
 	while (GetMessage(&msg, nullptr, 0, 0))
 	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		if (!TranslateAccelerator(msg.hwnd, accel_table, &msg))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -51,47 +108,32 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	return (int)msg.wParam;
 }
 //------------------------------------------------------------------------------------------------------------
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
-ATOM MyRegisterClass(HINSTANCE hInstance)
+ATOM AsMain_Window::Register_Class()
 {
 	WNDCLASSEXW wcex;
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc = WndProc;
+	wcex.lpfnWndProc = Window_Proc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_POPCORN));
+	wcex.hInstance = Instance;
+	wcex.hIcon = LoadIcon(Instance, MAKEINTRESOURCE(IDI_POPCORN));
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wcex.hbrBackground = AsConfig::BG_Color.Get_Brush();
 	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_POPCORN);
 	wcex.lpszClassName = szWindowClass;
-	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+	wcex.hIconSm = LoadIcon(Instance, MAKEINTRESOURCE(IDI_SMALL));
 
 	return RegisterClassExW(&wcex);
 }
 //------------------------------------------------------------------------------------------------------------
-//
-//   FUNCTION: InitInstance(HINSTANCE, int)
-//
-//   PURPOSE: Saves instance handle and creates main window
-//
-//   COMMENTS:
-//
-//        In this function, we save the instance handle in a global variable and
-//        create and display the main program window.
-//
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+BOOL AsMain_Window::Init_Instance(int command_show)
 {
-	hInst = hInstance; // Store instance handle in our global variable
-
+	HWND hwnd;
 	RECT window_rect;
+
 	window_rect.left = 0;
 	window_rect.top = 0;
 	window_rect.right = 320 * 3;
@@ -99,34 +141,36 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW, TRUE);
 
-	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, 0, 0, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top, 0, 0, hInstance, 0);
+	hwnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, 0, 0, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top, 0, 0, Instance, 0);
 
-	if (hWnd == 0)
+	if (hwnd == 0)
 		return FALSE;
 
-	Engine.Init_Engine(hWnd);
+	Engine.Init_Engine(hwnd);
 
-	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
+	ShowWindow(hwnd, command_show);
+	UpdateWindow(hwnd);
 
 	return TRUE;
 }
 //------------------------------------------------------------------------------------------------------------
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE: Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
-//
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void AsMain_Window::On_Paint(HWND hwnd)
+{
+	HDC hdc, frame_dc;
+	PAINTSTRUCT ps;
+
+	hdc = BeginPaint(hwnd, &ps);
+	frame_dc = Frame_DC.Get_DC(hwnd, hdc);
+	Engine.Draw_Frame(frame_dc, ps.rcPaint);
+
+	BitBlt(hdc, 0, 0, Frame_DC.Width, Frame_DC.Height, frame_dc, 0, 0, SRCCOPY);
+
+	EndPaint(hwnd, &ps);
+}
+//------------------------------------------------------------------------------------------------------------
+LRESULT CALLBACK AsMain_Window::Window_Proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId;
-	HDC hdc;
-	PAINTSTRUCT ps;
 
 	switch (message)
 	{
@@ -136,7 +180,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+			DialogBox(Self->Instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
@@ -148,10 +192,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		// TODO: Add any drawing code that uses hdc here...
-		Engine.Draw_Frame(hdc, ps.rcPaint);
-		EndPaint(hWnd, &ps);
+		Self->On_Paint(hWnd);
 	break;
 
 
@@ -164,13 +205,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case VK_LEFT:
-			return Engine.On_Key(EKey_Type::Left, true);
+			return Self->Engine.On_Key(EKey_Type::Left, true);
 
 		case VK_RIGHT:
-			return Engine.On_Key(EKey_Type::Right, true);
+			return Self->Engine.On_Key(EKey_Type::Right, true);
 
 		case VK_SPACE:
-			return Engine.On_Key(EKey_Type::Space, true);
+			return Self->Engine.On_Key(EKey_Type::Space, true);
 		}
 		break;
 
@@ -179,20 +220,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case VK_LEFT:
-			return Engine.On_Key(EKey_Type::Left, false);
+			return Self->Engine.On_Key(EKey_Type::Left, false);
 
 		case VK_RIGHT:
-			return Engine.On_Key(EKey_Type::Right, false);
+			return Self->Engine.On_Key(EKey_Type::Right, false);
 
 		case VK_SPACE:
-			return Engine.On_Key(EKey_Type::Space, false);
+			return Self->Engine.On_Key(EKey_Type::Space, false);
 		}
 		break;
 
 
 	case WM_TIMER:
 		if (wParam == Timer_ID)
-			return Engine.On_Timer();
+			return Self->Engine.On_Timer();
 		break;
 
 
@@ -202,14 +243,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 //------------------------------------------------------------------------------------------------------------
-// Message handler for about box.
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK AsMain_Window::About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	UNREFERENCED_PARAMETER(lParam);
+
 	switch (message)
 	{
 	case WM_INITDIALOG:
 		return (INT_PTR)TRUE;
+
 
 	case WM_COMMAND:
 		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
@@ -219,6 +261,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	}
+
 	return (INT_PTR)FALSE;
 }
 //------------------------------------------------------------------------------------------------------------
