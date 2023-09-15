@@ -3,7 +3,7 @@
 // AsEngine
 //------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
-: Timer_ID(WM_USER + 1), Game_State(EGame_State::Lost_Ball), Rest_Distance(0.0), Modules{}
+: Timer_ID(WM_USER + 1), Game_State(EGame_State::Mop_Level), Rest_Distance(0.0), Modules{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 
 	AsPlatform::Hit_Checker_List.Add_Hit_Checker(&Monster_Set);
 
-	Level.Set_Current_Level(1);
+	//Level.Set_Current_Level(1);
 
 	//Ball.Set_State(EBall_State::Normal, Platform.X_Pos + Platform.Width / 2);
 	//Platform.Set_State(EPS_Normal);
@@ -59,6 +59,8 @@ void AsEngine::Init_Engine(HWND hwnd)
 	Modules.push_back(&Laser_Beam_Set);
 	Modules.push_back(&Monster_Set);
 	Modules.push_back(&Info_Panel);
+
+	Level.Mop_Level(1);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
@@ -104,6 +106,12 @@ int AsEngine::On_Timer()
 	case EGame_State::Test_Ball:
 		Ball_Set.Set_For_Test();
 		Game_State = EGame_State::Play_Level;
+		break;
+
+
+	case EGame_State::Mop_Level:
+		if (Level.Is_Level_Mopping_Done() )
+			Restart_Level();
 		break;
 
 

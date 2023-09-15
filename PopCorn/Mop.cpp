@@ -16,7 +16,7 @@ AsMop::~AsMop()
 }
 //------------------------------------------------------------------------------------------------------------
 AsMop::AsMop()
-	: Acting(false), Y_Pos(0), Start_Tick(0)
+: Mop_State(EMop_State::Idle), Y_Pos(0), Max_Y_Pos(0), Lifting_Height(0), Start_Tick(0)
 {
 	int i;
 	int x_pos, y_pos;
@@ -59,26 +59,94 @@ double AsMop::Get_Speed()
 	return 0.0;  //!!! Надо сделать!
 }
 //------------------------------------------------------------------------------------------------------------
+void AsMop::Act_Lifting(bool lift_up)
+{
+	int time_offset;
+	double ratio;
+
+	time_offset = AsConfig::Current_Timer_Tick - Start_Tick;
+
+	if (time_offset <= Lifting_Timeout)
+	{
+		ratio = (double)time_offset / (double)Lifting_Timeout;
+
+		if (lift_up)
+			ratio = 1.0 - ratio;
+
+		Max_Y_Pos = AsConfig::Max_Y_Pos + (int)( (double)Lifting_Height * ratio);
+		Set_Mop();
+	}
+	else
+	{
+		if (lift_up)
+		{
+			Mop_State = EMop_State::Cleaning;
+			Start_Tick = AsConfig::Current_Timer_Tick;
+		}
+		else
+			Mop_State = EMop_State::Descend_Done;
+	}
+}
+//------------------------------------------------------------------------------------------------------------
 void AsMop::Act()
 {
 	int time_offset;
 	double ratio;
 
-	if (! Acting)
+	if (Mop_State == EMop_State::Idle || Mop_State == EMop_State::Clean_Done || Mop_State == EMop_State::Descend_Done)
 		return;
 
 	Prev_Mop_Rect = Mop_Rect;
 
 	time_offset = AsConfig::Current_Timer_Tick - Start_Tick;
 
-	if (time_offset <= Expansion_Timeout)
+	switch (Mop_State)
 	{
-		ratio = (double)time_offset / (double)Expansion_Timeout;
+	case EMop_State::Ascending:
+		Act_Lifting(true);  // Поднимаем сложенную швабру
+		break;
 
-		for (auto *cylinder : Mop_Cylinders)
-			cylinder->Set_Height_For(ratio);
 
-		Set_Mop();
+	case EMop_State::Cleaning:
+		if (time_offset > Expansion_Timeout)
+			Mop_State = EMop_State::Clean_Done;
+		break;
+
+
+	case EMop_State::Showing:
+		if (time_offset > Expansion_Timeout)
+		{
+			Mop_State = EMop_State::Descending;
+			Start_Tick = AsConfig::Current_Timer_Tick;
+		}
+		break;
+
+
+	case EMop_State::Descending:
+		Act_Lifting(false);  // Опускаем сложенную швабру
+		break;
+
+
+	default:
+		AsConfig::Throw();
+	}
+
+	if (Mop_State == EMop_State::Cleaning || Mop_State == EMop_State::Showing)
+	{
+		time_offset = AsConfig::Current_Timer_Tick - Start_Tick;
+
+		if (time_offset <= Expansion_Timeout)
+		{
+			ratio = (double)time_offset / (double)Expansion_Timeout;
+
+			if (Mop_State == EMop_State::Showing)
+				ratio = 1.0 - ratio;
+
+			for (auto *cylinder : Mop_Cylinders)
+				cylinder->Set_Height_For(ratio);
+
+			Set_Mop();
+		}
 	}
 
 	for (auto *indicator : Mop_Indicators)
@@ -92,7 +160,7 @@ void AsMop::Clear(HDC hdc, RECT &paint_area)
 {
 	RECT intersection_rect;
 
-	if (! Acting)
+	if (Mop_State == EMop_State::Idle)
 		return;
 
 	if (! IntersectRect(&intersection_rect, &paint_area, &Prev_Mop_Rect) )
@@ -106,7 +174,7 @@ void AsMop::Clear(HDC hdc, RECT &paint_area)
 //------------------------------------------------------------------------------------------------------------
 void AsMop::Draw(HDC hdc, RECT &paint_area)
 {
-	if (! Acting)
+	if (Mop_State == EMop_State::Idle)
 		return;
 
 	AsTools::Rect(hdc, AsConfig::Level_X_Offset, Y_Pos, Width, Height, AsConfig::Red_Color);
@@ -123,26 +191,58 @@ bool AsMop::Is_Finished()
 	return false;  //!!! Надо сделать!
 }
 //------------------------------------------------------------------------------------------------------------
-void AsMop::Erase_Level()
+void AsMop::Activate(bool cleaning)
 {
-	Start_Tick = AsConfig::Current_Timer_Tick;
-	Y_Pos = 172;
-	Acting = true;
+	if (cleaning)
+	{
+		Y_Pos = 172;
+		Mop_State = EMop_State::Ascending;
 
+		Lifting_Height = Get_Cylinders_Height() + Height;
+		Max_Y_Pos = AsConfig::Max_Y_Pos + Lifting_Height;
+	}
+	else
+		Mop_State = EMop_State::Showing;
+
+	Start_Tick = AsConfig::Current_Timer_Tick;
 	Set_Mop();
+}
+//------------------------------------------------------------------------------------------------------------
+void AsMop::Clean_Area(HDC hdc)
+{
+	RECT rect;
+
+	if (Mop_State == EMop_State::Idle)
+		return;
+
+	rect = Mop_Rect;
+	rect.bottom = AsConfig::Max_Y_Pos * AsConfig::Global_Scale;
+
+	AsTools::Rect(hdc, rect, AsConfig::BG_Color);
+}
+//------------------------------------------------------------------------------------------------------------
+EMop_State AsMop::Get_Mop_State()
+{
+	return Mop_State;
+}
+//------------------------------------------------------------------------------------------------------------
+int AsMop::Get_Cylinders_Height()
+{
+	int total_cylinder_height = 0;
+
+	for (auto *cylinder : Mop_Cylinders)
+		total_cylinder_height += cylinder->Get_Height();
+
+	return total_cylinder_height;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsMop::Set_Mop()
 {
 	int i;
 	int curr_y_pos = 0;
-	int total_cylinder_height = 0;
 	const int scale = AsConfig::Global_Scale;
 
-	for (auto *cylinder : Mop_Cylinders)
-		total_cylinder_height += cylinder->Get_Height();
-
-	Y_Pos = AsConfig::Max_Y_Pos - total_cylinder_height - Height + 1;
+	Y_Pos = Max_Y_Pos - Get_Cylinders_Height() - Height + 1;
 
 	for (auto *indicator : Mop_Indicators)
 		indicator->Set_Y_Pos(Y_Pos + 1);
