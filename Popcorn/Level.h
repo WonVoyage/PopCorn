@@ -3,6 +3,7 @@
 #include "Falling_Letter.h"
 #include "Info_Panel.h"
 #include "Level_Data.h"
+#include "Mop.h"
 
 //------------------------------------------------------------------------------------------------------------
 class APoint
@@ -12,49 +13,6 @@ public:
 	APoint(int x, int y);
 
 	int X, Y;
-};
-//------------------------------------------------------------------------------------------------------------
-class AMop_Indicator: public AGraphics_Object
-{
-public:
-	AMop_Indicator(int x_pos, int y_pos, int time_offset);
-
-	virtual void Act();
-	virtual void Clear(HDC hdc, RECT &paint_area);
-	virtual void Draw(HDC hdc, RECT &paint_area);
-	virtual bool Is_Finished();
-
-private:
-	int X_Pos, Y_Pos;
-	int Time_Offset;
-	const AColor *Current_Color;
-	RECT Indicator_Rect;
-
-	static const int Width = 17;
-	static const int Height = 5;
-	static const int Max_Fade_Step = AsConfig::FPS * 4 / 10;  // 0.4 секунды
-	static const int Normal_Timeout = AsConfig::FPS;  // 1 секунда
-	static AColor_Fade Fading_Blue_Colors;
-};
-//------------------------------------------------------------------------------------------------------------
-class AsMop: public AGame_Object
-{
-public:
-	~AsMop();
-	AsMop();
-
-	virtual void Begin_Movement();
-	virtual void Finish_Movement();
-	virtual void Advance(double max_speed);
-	virtual double Get_Speed();
-
-	virtual void Act();
-	virtual void Clear(HDC hdc, RECT &paint_area);
-	virtual void Draw(HDC hdc, RECT &paint_area);
-	virtual bool Is_Finished();
-
-private:
-	std::vector<AMop_Indicator *> Mop_Indicator;
 };
 //------------------------------------------------------------------------------------------------------------
 class AsLevel: public AHit_Checker, public AGame_Object
