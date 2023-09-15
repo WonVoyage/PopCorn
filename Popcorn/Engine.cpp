@@ -60,7 +60,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 	Modules.push_back(&Monster_Set);
 	Modules.push_back(&Info_Panel);
 
-	Level.Mop_Level(1);
+	Level.Mop_Level(7);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
@@ -121,12 +121,12 @@ int AsEngine::On_Timer()
 
 
 	case EGame_State::Lost_Ball:
-		if (Platform.Has_State(EPlatform_Substate_Regular::Missing) )
+		if (Is_Destroying_Complete() )
 		{
-			if (! Info_Panel.Decrease_Life_Count() )
+			if (Info_Panel.Decrease_Life_Count() )
+				Restart_Level();
+			else
 				Game_Over();
-
-			Restart_Level();
 		}
 		break;
 
@@ -143,17 +143,29 @@ int AsEngine::On_Timer()
 
 
 	case EGame_State::Finish_Level:
-		if (Monster_Set.Are_All_Destroyed() && Platform.Has_State(EPlatform_Substate_Regular::Missing) )
+		if (Is_Destroying_Complete() )
 		{
 			Level.Mop_Next_Level();
 			Game_State = EGame_State::Mop_Level;
 		}
 		break;
+
+
+	case EGame_State::Game_Over:
+		break;  // Не делаем ничего
 	}
 
 	Act();
 
 	return 0;
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsEngine::Is_Destroying_Complete()
+{
+	if (Monster_Set.Are_All_Destroyed() && Platform.Has_State(EPlatform_Substate_Regular::Missing) )
+		return true;
+	else
+		return false;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Restart_Level()
@@ -192,12 +204,13 @@ void AsEngine::Stop_Play()
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Game_Over()
 {
-	AsConfig::Throw();  //!!! Надо сделать!
+	Level.Game_Title.Show(true);
+	Game_State = EGame_State::Game_Over;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Game_Won()
 {
-	AsConfig::Throw();  //!!! Надо сделать!
+	Level.Game_Title.Show(false);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Advance_Movers()

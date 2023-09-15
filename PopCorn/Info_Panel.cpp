@@ -20,6 +20,7 @@ void ALabel::Draw(HDC hdc)
 	SIZE str_size;
 
 	// 2. Выводим строку
+	SetBkMode(hdc, TRANSPARENT);
 	Font.Select(hdc);
 
 	GetTextExtentPoint32(hdc, Content.Get_Content(), Content.Get_Length(), &str_size);

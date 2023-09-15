@@ -47,6 +47,61 @@ private:
 	static const int Y_Pos = 150;
 };
 //------------------------------------------------------------------------------------------------------------
+class AFinal_Letter: public AGraphics_Object
+{
+public:
+	AFinal_Letter(double x_pos, double y_pos, const wchar_t letter);
+
+	virtual void Act();
+	virtual void Clear(HDC hdc, RECT &paint_area);
+	virtual void Draw(HDC hdc, RECT &paint_area);
+	virtual bool Is_Finished();
+
+	double X_Pos, Y_Pos;
+
+private:
+	wchar_t Letter;
+};
+//------------------------------------------------------------------------------------------------------------
+enum class EGame_Title_State: unsigned char
+{
+	Idle,
+
+	Game_Over_Descent,
+	Game_Over_Destroy,
+
+	Game_Won_Descent,
+	Game_Won_Animate,
+
+	Finished
+};
+//------------------------------------------------------------------------------------------------------------
+class AsGame_Title: public AGraphics_Object
+{
+public:
+	~AsGame_Title();
+	AsGame_Title();
+
+	virtual void Act();
+	virtual void Clear(HDC hdc, RECT &paint_area);
+	virtual void Draw(HDC hdc, RECT &paint_area);
+	virtual bool Is_Finished();
+
+	void Show(bool game_over);
+	bool Is_Visible();
+
+private:
+	EGame_Title_State Game_Title_State;
+	int Start_Tick;
+	RECT Title_Rect, Prev_Title_Rect;
+
+	std::vector<AFinal_Letter *> Title_Letters;
+
+	static const int Descent_Timeout = AsConfig::FPS * 6;  // Спускается за 6 секунд
+	static const int Height = 32;
+	static const double Low_Y_Pos;
+};
+//------------------------------------------------------------------------------------------------------------
 class AsLevel: public AHit_Checker, public AGame_Object
 {
 public:
@@ -77,6 +132,8 @@ public:
 	void Show_Title();
 	void Hide_Title();
 
+	AsGame_Title Game_Title;
+
 	static bool Has_Brick_At(int level_x, int level_y);
 	static bool Has_Brick_At(RECT &monster_rect);
 
@@ -96,7 +153,6 @@ private:
 	void Act_Objects(std::vector<AGraphics_Object *> &falling_letters);
 	void Cancel_All_Activity();
 
-	RECT Level_Rect;
 	bool Need_To_Cancel_All;
 	int Next_Level_Number, Current_Level_Number;
 	int Available_Bricks_Count;
@@ -104,6 +160,7 @@ private:
 	double Current_Brick_Left_X, Current_Brick_Right_X;
 	double Current_Brick_Top_Y, Current_Brick_Low_Y;
 
+	RECT Level_Rect;
 	AColor Parachute_Color;
 
 	char Current_Level[AsConfig::Level_Height][AsConfig::Level_Width];

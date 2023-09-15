@@ -87,6 +87,188 @@ void AsLevel_Title::Hide()
 
 
 
+// AFinal_Letter
+//------------------------------------------------------------------------------------------------------------
+AFinal_Letter::AFinal_Letter(double x_pos, double y_pos, const wchar_t letter)
+: X_Pos(x_pos), Y_Pos(y_pos), Letter(letter)
+{
+}
+//------------------------------------------------------------------------------------------------------------
+void AFinal_Letter::Act()
+{
+	//!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+void AFinal_Letter::Clear(HDC hdc, RECT &paint_area)
+{
+	//!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+void AFinal_Letter::Draw(HDC hdc, RECT &paint_area)
+{
+	//Letter.Draw(hdc);
+
+	SetBkMode(hdc, TRANSPARENT);
+	AsConfig::Game_Over_Font.Select(hdc);
+	SetTextColor(hdc, AsConfig::White_Color.Get_RGB() );
+
+	TextOut(hdc, (int)(X_Pos * AsConfig::D_Global_Scale), (int)(Y_Pos * AsConfig::D_Global_Scale), &Letter, 1);
+}
+//------------------------------------------------------------------------------------------------------------
+bool AFinal_Letter::Is_Finished()
+{
+	return false;  //!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+// AsGame_Title
+const double AsGame_Title::Low_Y_Pos = 135.0;
+//------------------------------------------------------------------------------------------------------------
+AsGame_Title::~AsGame_Title()
+{
+	for (auto *letter : Title_Letters)
+		delete letter;
+
+	Title_Letters.erase(Title_Letters.begin(), Title_Letters.end() );
+}
+//------------------------------------------------------------------------------------------------------------
+AsGame_Title::AsGame_Title()
+: Game_Title_State(EGame_Title_State::Idle), Start_Tick(0)
+{
+}
+//------------------------------------------------------------------------------------------------------------
+void AsGame_Title::Act()
+{
+	double y_pos;
+	int curr_tick;
+	double ratio;
+
+	if (Game_Title_State == EGame_Title_State::Idle || Game_Title_State == EGame_Title_State::Finished)
+		return;
+
+	curr_tick = AsConfig::Current_Timer_Tick - Start_Tick;
+
+	switch (Game_Title_State)
+	{
+	case EGame_Title_State::Game_Over_Descent:
+	case EGame_Title_State::Game_Won_Descent:
+		if (curr_tick < Descent_Timeout)
+			ratio = (double)curr_tick / (double)Descent_Timeout;
+		else
+			ratio = 1.0;
+
+		y_pos = Low_Y_Pos * ratio;
+
+		for (auto *letter : Title_Letters)
+			letter->Y_Pos = y_pos;
+
+		Prev_Title_Rect = Title_Rect;
+
+		Title_Rect.top = (int)(y_pos * AsConfig::D_Global_Scale);
+		Title_Rect.bottom = Title_Rect.top + Height * AsConfig::Global_Scale;
+
+		AsTools::Invalidate_Rect(Title_Rect);
+		AsTools::Invalidate_Rect(Prev_Title_Rect);
+		break;
+	}
+}
+//------------------------------------------------------------------------------------------------------------
+void AsGame_Title::Clear(HDC hdc, RECT &paint_area)
+{
+	RECT intersection_rect;
+
+	if (Game_Title_State == EGame_Title_State::Idle || Game_Title_State == EGame_Title_State::Finished)
+		return;
+
+	if (! IntersectRect(&intersection_rect, &paint_area, &Prev_Title_Rect) )
+		return;
+
+	AsTools::Rect(hdc, Prev_Title_Rect, AsConfig::BG_Color);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsGame_Title::Draw(HDC hdc, RECT &paint_area)
+{
+	RECT intersection_rect;
+
+	if (Game_Title_State == EGame_Title_State::Idle || Game_Title_State == EGame_Title_State::Finished)
+		return;
+
+	if (! IntersectRect(&intersection_rect, &paint_area, &Title_Rect) )
+		return;
+
+	for (auto *letter : Title_Letters)
+		letter->Draw(hdc, paint_area);
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsGame_Title::Is_Finished()
+{
+	return false;  //!!! Надо сделать!
+}
+//------------------------------------------------------------------------------------------------------------
+void AsGame_Title::Show(bool game_over)
+{
+	double title_x, title_end_x;
+	double title_y = 0.0;
+	const double d_scale = AsConfig::D_Global_Scale;
+
+	if (game_over)
+	{
+		title_x = 31.0;
+
+		Title_Letters.push_back(new AFinal_Letter(title_x, title_y, L'К') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 13.0, title_y, L'О') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 29.0, title_y, L'Н') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 45.0, title_y, L'Е') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 59.0, title_y, L'Ц') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 80.0, title_y, L'И') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 96.0, title_y, L'Г') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 109.0, title_y, L'Р') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 121.0, title_y, L'Ы') );
+
+		Game_Title_State = EGame_Title_State::Game_Over_Descent;
+	}
+	else
+	{
+		title_x = 54.0;
+
+		Title_Letters.push_back(new AFinal_Letter(title_x, title_y, L'П') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 16.0, title_y, L'О') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 33.0, title_y, L'Б') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 46.0, title_y, L'Е') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 59.0, title_y, L'Д') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 75.0, title_y, L'А') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 91.0, title_y, L'!') );
+
+		Game_Title_State = EGame_Title_State::Game_Won_Descent;
+	}
+
+	title_end_x = Title_Letters[Title_Letters.size() - 1]->X_Pos + 16;
+
+	Title_Rect.left = (int)(title_x * d_scale);
+	Title_Rect.top = (int)(title_y * d_scale);
+	Title_Rect.right = Title_Rect.left + (int)(title_end_x * d_scale);
+	Title_Rect.bottom = Title_Rect.top + Height * AsConfig::Global_Scale;
+
+	Start_Tick = AsConfig::Current_Timer_Tick;
+
+	AsTools::Invalidate_Rect(Title_Rect);
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsGame_Title::Is_Visible()
+{
+	if (Game_Title_State != EGame_Title_State::Idle)
+		return true;
+	else
+		return false;
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
 // AsLevel
 //------------------------------------------------------------------------------------------------------------
 AsLevel *AsLevel::Level = 0;
@@ -246,6 +428,7 @@ void AsLevel::Act()
 		Advertisement->Act();
 
 	Mop.Act();
+	Game_Title.Act();
 }
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Clear(HDC hdc, RECT &paint_area)
@@ -265,6 +448,7 @@ void AsLevel::Clear(HDC hdc, RECT &paint_area)
 
 	Mop.Clear(hdc, paint_area);
 	Level_Title.Clear(hdc, paint_area);
+	Game_Title.Clear(hdc, paint_area);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Draw(HDC hdc, RECT &paint_area)
@@ -272,6 +456,8 @@ void AsLevel::Draw(HDC hdc, RECT &paint_area)
 
 	int i, j;
 	RECT intersection_rect, brick_rect;
+
+	Game_Title.Draw(hdc, paint_area);
 
 	if (Advertisement != 0)
 		Advertisement->Draw(hdc, paint_area);
@@ -331,6 +517,8 @@ void AsLevel::Init()
 		if (i == 9)
 			level_data->Advertisement = new AAdvertisement(1, 9, 2, 3);
 	}
+
+	//Game_Title.Show(false);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Set_Current_Level(int level_number)
@@ -858,7 +1046,7 @@ void AsLevel::Draw_Brick(HDC hdc, RECT &brick_rect, int level_x, int level_y)
 	switch (brick_type)
 	{
 	case EBrick_Type::None:
-		if (Advertisement != 0 && Advertisement->Has_Brick_At(level_x, level_y) )
+		if ( (Advertisement != 0 && Advertisement->Has_Brick_At(level_x, level_y) ) || Game_Title.Is_Visible() )
 			break;
 		// else - No break!
 

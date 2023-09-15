@@ -23,7 +23,8 @@ enum class EGame_State: unsigned char
 	Play_Level,
 	Lost_Ball,
 	Restart_Level,
-	Finish_Level
+	Finish_Level,
+	Game_Over
 };
 //------------------------------------------------------------------------------------------------------------
 class AsEngine
@@ -39,6 +40,7 @@ public:
 	const int Timer_ID;
 
 private:
+	bool Is_Destroying_Complete();
 	void Restart_Level();
 	void Play_Level();
 	void Stop_Play();

@@ -45,7 +45,7 @@ class AFont
 {
 public:
 	~AFont();
-	AFont(int height, int weight, int family, const wchar_t *face_name);
+	AFont(int height, int weight, int family, const wchar_t *face_name, bool is_italic = false);
 
 	void Select(HDC hdc) const;
 
@@ -68,7 +68,7 @@ public:
 	static const AColor Monster_Dark_Red_Color, Monster_Cornea_Color, Monster_Iris_Color, Monster_Comet_Tail;
 	static const AColor BG_Outline_Color, Explosion_Red_Color, Explosion_Blue_Color;
 	static const AColor Shadow_Color, Highlight_Color;
-	static const AFont Name_Font, Score_Font, Logo_Pop_Font, Logo_Corn_Font;
+	static const AFont Name_Font, Score_Font, Logo_Pop_Font, Logo_Corn_Font, Game_Over_Font;
 
 	static const double D_Global_Scale;
 	static const double Moving_Step_Size;
@@ -98,7 +98,7 @@ public:
 	static const int Max_Falling_Letters_Count = 10;
 	static const int Max_Balls_Count = 10;
 	static const int Max_Movers_Count = 10;
-	static const int Initial_Life_Count = 5;
+	static const int Initial_Life_Count = 0;
 	static const int Max_Life_Count = 12;
 	static const int Floor_Y_Pos = Max_Y_Pos - 1;
 	static const int Platform_Normal_Width = 28;
