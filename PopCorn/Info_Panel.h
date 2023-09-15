@@ -30,6 +30,7 @@ public:
 	void Init();
 	void Increase_Life_Count();
 	bool Decrease_Life_Count();
+	bool Edit_Player_Name(wchar_t symbol);
 
 	static void Update_Score(EScore_Event_Type event_type);
 
@@ -41,7 +42,9 @@ private:
 	void Draw_Extra_Life(HDC hdc, int x_pos, int y_pos);
 	//void Draw_String(HDC hdc, RECT &rect, AString &str, bool draw_name);
 
+	bool Expecting_User_Name;
 	int Extra_Lives_Count;
+	int Start_Tick;
 	//HFONT Logo_Pop_Font, Logo_Corn_Font;
 	AColor Dark_Blue, Dark_Red;
 
@@ -65,5 +68,6 @@ private:
 	static const int Score_Height = 90;
 	static const int Score_Value_Offset = 20;
 	static const int Indicator_Y_Offset = 55;
+	static const int Blink_Timeout = AsConfig::FPS / 2;
 };
 //------------------------------------------------------------------------------------------------------------

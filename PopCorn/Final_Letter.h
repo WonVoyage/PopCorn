@@ -8,6 +8,7 @@ enum class EFinal_Letter_State: unsigned char
 	Show_Letter,
 	Hide_Letter,
 	Explosing,
+	Color_Letter,
 	Finished
 };
 //------------------------------------------------------------------------------------------------------------
@@ -22,10 +23,12 @@ public:
 	virtual bool Is_Finished();
 
 	void Destroy();
+	void Set_Color(unsigned char r, unsigned char g, unsigned char b);
 
 	double X_Pos, Y_Pos;
 
 private:
+	void Setup_Letter_Rect();
 	void Draw_Letter(HDC hdc, bool in_color);
 
 	bool Got_Letter_Size;
@@ -33,5 +36,6 @@ private:
 	wchar_t Letter;
 	int Width, Height;
 	RECT Letter_Rect;
+	AColor Color;
 };
 //------------------------------------------------------------------------------------------------------------

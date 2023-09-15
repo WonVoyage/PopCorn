@@ -124,6 +124,19 @@ void AString::Append(int value, int digits)
 	Content += buf;
 }
 //------------------------------------------------------------------------------------------------------------
+void AString::Append(wchar_t symbol)
+{
+	Content.append(1, symbol);
+}
+//------------------------------------------------------------------------------------------------------------
+void AString::Delete_Last_Symbol()
+{
+	int len = Content.size();
+
+	if (len > 0)
+		Content.resize(len - 1);
+}
+//------------------------------------------------------------------------------------------------------------
 const wchar_t *AString::Get_Content()
 {
 	return Content.c_str();

@@ -72,34 +72,15 @@ void AsGame_Title::Act()
 	case EGame_Title_State::Game_Over_Destroy:
 		Destroy_Letters(curr_tick);
 		break;
-	}
-}
-//------------------------------------------------------------------------------------------------------------
-void AsGame_Title::Destroy_Letters(int curr_tick)
-{
-	bool can_finish = false;
-	bool all_letters_are_finished = true;
 
-	if (Destroy_Index == -1 || curr_tick % Destroy_Delay == 0)
-	{// Условие сработает каждый Destroy_Delay тик
 
-		++Destroy_Index;
-
-		if (Destroy_Index >= 0 && Destroy_Index < (int)Title_Letters.size() )
-			Title_Letters[Destroy_Index]->Destroy();
+	case EGame_Title_State::Game_Won_Animate:
+		if (curr_tick < Game_Won_Animate_Timeout)
+			Animate_Game_Won();
 		else
-			can_finish = true;
+			Game_Title_State = EGame_Title_State::Finished;
+		break;
 	}
-
-	for (auto *letter : Title_Letters)
-	{
-		letter->Act();
-
-		all_letters_are_finished &= letter->Is_Finished();
-	}
-
-	if (can_finish && all_letters_are_finished)
-		Game_Title_State = EGame_Title_State::Finished;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsGame_Title::Clear(HDC hdc, RECT &paint_area)
@@ -190,5 +171,49 @@ bool AsGame_Title::Is_Visible()
 		return true;
 	else
 		return false;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsGame_Title::Destroy_Letters(int curr_tick)
+{
+	bool can_finish = false;
+	bool all_letters_are_finished = true;
+
+	if (Destroy_Index == -1 || curr_tick % Destroy_Delay == 0)
+	{// Условие сработает каждый Destroy_Delay тик
+
+		++Destroy_Index;
+
+		if (Destroy_Index >= 0 && Destroy_Index < (int)Title_Letters.size() )
+			Title_Letters[Destroy_Index]->Destroy();
+		else
+			can_finish = true;
+	}
+
+	for (auto *letter : Title_Letters)
+	{
+		letter->Act();
+
+		all_letters_are_finished &= letter->Is_Finished();
+	}
+
+	if (can_finish && all_letters_are_finished)
+		Game_Title_State = EGame_Title_State::Finished;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsGame_Title::Animate_Game_Won()
+{
+	unsigned char r, g, b;
+	int letter_index;
+	AFinal_Letter *letter;
+
+	letter_index = AsTools::Rand(Title_Letters.size() );
+
+	letter = Title_Letters[letter_index];
+
+	r = AsTools::Rand(256);
+	g = AsTools::Rand(256);
+	b = AsTools::Rand(256);
+
+	letter->Set_Color(r, g, b);
 }
 //------------------------------------------------------------------------------------------------------------

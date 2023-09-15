@@ -19,12 +19,14 @@ enum class EGame_State: unsigned char
 {
 	Test_Ball,
 
+	Enter_name,
 	Mop_Level,
 	Play_Level,
 	Lost_Ball,
 	Restart_Level,
 	Finish_Level,
-	Game_Over
+	Game_Over,
+	Game_Won
 };
 //------------------------------------------------------------------------------------------------------------
 class AsEngine
@@ -36,6 +38,7 @@ public:
 	void Draw_Frame(HDC hdc, RECT &paint_area);
 	int On_Key(EKey_Type key_type, bool key_down);
 	int On_Timer();
+	void On_Char(wchar_t symbol);
 
 	const int Timer_ID;
 
@@ -52,6 +55,7 @@ private:
 	void On_Falling_Letter(AFalling_Letter *falling_letter);
 
 	EGame_State Game_State;
+	bool Got_Name;
 	double Rest_Distance;
 
 	AsLevel Level;

@@ -6,14 +6,14 @@ RECT AsInfo_Panel::Logo_Rect;
 RECT AsInfo_Panel::Data_Rect;
 //------------------------------------------------------------------------------------------------------------
 AsInfo_Panel::AsInfo_Panel()
-: Extra_Lives_Count(AsConfig::Initial_Life_Count), Dark_Blue(0, 170, 170), Dark_Red(151, 0, 0),
+: Expecting_User_Name(true), Extra_Lives_Count(AsConfig::Initial_Life_Count), Start_Tick(0), Dark_Blue(0, 170, 170), Dark_Red(151, 0, 0),
   Letter_P(EBrick_Type::Blue, ELetter_Type::P, 214 * AsConfig::Global_Scale + 1, 153 * AsConfig::Global_Scale),
   Letter_G(EBrick_Type::Blue, ELetter_Type::G, 256 * AsConfig::Global_Scale, 153 * AsConfig::Global_Scale),
   Letter_M(EBrick_Type::Blue, ELetter_Type::M, 297 * AsConfig::Global_Scale - 1, 153 * AsConfig::Global_Scale),
   Floor_Indicator(EMessage_Type::Floor_Is_Over, Score_X + 8, Score_Y + Indicator_Y_Offset),
   Monster_Indicator(EMessage_Type::Unfreeze_Monsters, Score_X + 90, Score_Y + Indicator_Y_Offset),
-  Player_Name_Label(Score_X + 5, Score_Y + 5, Score_Width - 2 * 5, 16, AsConfig::Name_Font, AsConfig::Blue_Color),
-  Score_Label(Score_X + 5, Score_Y + 5 + Score_Value_Offset, Score_Width - 2 * 5, 16, AsConfig::Score_Font, AsConfig::White_Color)
+  Player_Name_Label(Score_X + 5, Score_Y + 5, Score_Width - 2 * 5, 18, AsConfig::Name_Font, AsConfig::Blue_Color),
+  Score_Label(Score_X + 5, Score_Y + 5 + Score_Value_Offset, Score_Width - 2 * 5, 18, AsConfig::Score_Font, AsConfig::White_Color)
 {
 	const int scale = AsConfig::Global_Scale;
 
@@ -56,8 +56,27 @@ double AsInfo_Panel::Get_Speed()
 //------------------------------------------------------------------------------------------------------------
 void AsInfo_Panel::Act()
 {
+	int curr_tick;
+
 	Floor_Indicator.Act();
 	Monster_Indicator.Act();
+
+	if (Expecting_User_Name)
+	{
+		curr_tick = AsConfig::Current_Timer_Tick - Start_Tick;
+
+		if (curr_tick > Blink_Timeout)
+		{
+			Start_Tick = AsConfig::Current_Timer_Tick;
+
+			if (Player_Name_Label.Content.Get_Length() == 0)
+				Player_Name_Label.Content = L"ВВЕДИТЕ ИМЯ";
+			else
+				Player_Name_Label.Content = L"";
+
+			AsTools::Invalidate_Rect(Data_Rect);
+		}
+	}
 }
 //------------------------------------------------------------------------------------------------------------
 void AsInfo_Panel::Clear(HDC hdc, RECT &paint_area)
@@ -122,7 +141,6 @@ void AsInfo_Panel::Draw(HDC hdc, RECT &paint_area)
 		// 2.3. Имя игрока
 		AsTools::Rect(hdc, Player_Name_Label.Content_Rect, Dark_Red);  // Выводим плашку фона
 
-		Player_Name_Label.Content = L"COMPUTER";
 		Player_Name_Label.Draw(hdc);
 
 		// 3. Счёт игрока
@@ -174,6 +192,17 @@ bool AsInfo_Panel::Decrease_Life_Count()
 	AsTools::Invalidate_Rect(Data_Rect);
 
 	return true;
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsInfo_Panel::Edit_Player_Name(wchar_t symbol)
+{
+	if (Expecting_User_Name)
+	{
+		Player_Name_Label.Content = L"";
+		Expecting_User_Name = false;
+	}
+
+	return Player_Name_Label.Append(symbol);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsInfo_Panel::Update_Score(EScore_Event_Type event_type)

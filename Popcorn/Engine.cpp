@@ -3,7 +3,7 @@
 // AsEngine
 //------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
-: Timer_ID(WM_USER + 1), Game_State(EGame_State::Mop_Level), Rest_Distance(0.0), Modules{}
+: Timer_ID(WM_USER + 1), Game_State(EGame_State::Enter_name), Got_Name(false), Rest_Distance(0.0), Modules{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -59,8 +59,6 @@ void AsEngine::Init_Engine(HWND hwnd)
 	Modules.push_back(&Laser_Beam_Set);
 	Modules.push_back(&Monster_Set);
 	Modules.push_back(&Info_Panel);
-
-	Level.Mop_Level(7);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
@@ -109,6 +107,15 @@ int AsEngine::On_Timer()
 		break;
 
 
+	case EGame_State::Enter_name:
+		if (Got_Name)
+		{
+			Level.Mop_Level(1);
+			Game_State = EGame_State::Mop_Level;
+		}
+		break;
+
+
 	case EGame_State::Mop_Level:
 		if (Level.Is_Level_Mopping_Done() )
 			Restart_Level();
@@ -153,11 +160,22 @@ int AsEngine::On_Timer()
 
 	case EGame_State::Game_Over:
 		break;  // Не делаем ничего
+
+
+	case EGame_State::Game_Won:
+		if (Is_Destroying_Complete() )
+			Game_Won();
+		break;
 	}
 
 	Act();
 
 	return 0;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsEngine::On_Char(wchar_t symbol)
+{
+	Got_Name = Info_Panel.Edit_Player_Name(symbol);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsEngine::Is_Destroying_Complete()
@@ -211,6 +229,7 @@ void AsEngine::Game_Over()
 void AsEngine::Game_Won()
 {
 	Level.Game_Title.Show(false);
+	Game_State = EGame_State::Game_Over;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Advance_Movers()
@@ -291,14 +310,14 @@ void AsEngine::Handle_Message()
 
 
 		case EMessage_Type::Level_Done:
-			if (! Level.Can_Mop_Next_Level() )
-				Game_Won();
-			else
-			{
-				Stop_Play();
-				Ball_Set.Disable_All_Balls();
+			Stop_Play();
+			Ball_Set.Disable_All_Balls();
+
+			if (Level.Can_Mop_Next_Level() )
 				Game_State = EGame_State::Finish_Level;
-			}
+			else
+				Game_State = EGame_State::Game_Won;
+
 			break;
 
 		default:

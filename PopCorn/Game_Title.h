@@ -33,6 +33,7 @@ public:
 
 private:
 	void Destroy_Letters(int curr_tick);
+	void Animate_Game_Won();
 
 	EGame_Title_State Game_Title_State;
 	int Start_Tick;
@@ -43,6 +44,7 @@ private:
 
 	static const int Descent_Timeout = AsConfig::FPS * 6;  // Спускается за 6 секунд
 	static const int Game_Over_Showing_Timeout = AsConfig::FPS * 2;
+	static const int Game_Won_Animate_Timeout = AsConfig::FPS * 30;
 	static const int Destroy_Delay = AsConfig::FPS / 2;
 	static const int Height = 32;
 	static const double Low_Y_Pos;
