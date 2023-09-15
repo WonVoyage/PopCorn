@@ -1,4 +1,4 @@
-#include "Label.h"
+ï»¿#include "Label.h"
 
 // ALabel
 //------------------------------------------------------------------------------------------------------------
@@ -19,7 +19,7 @@ void ALabel::Draw(HDC hdc)
 	const int scale = AsConfig::Global_Scale;
 	SIZE str_size;
 
-	// 2. Âûâîäèì ñòðîêó
+	// 2. Ð’Ñ‹Ð²Ð¾Ð´Ð¸Ð¼ ÑÑ‚Ñ€Ð¾ÐºÑƒ
 	SetBkMode(hdc, TRANSPARENT);
 	Font.Select(hdc);
 
@@ -38,22 +38,22 @@ void ALabel::Draw(HDC hdc)
 	str_left_offset = Content_Rect.left + (Content_Rect.right - Content_Rect.left) / 2 - str_size.cx / 2;
 	str_top_offset = Content_Rect.top + (Content_Rect.bottom - Content_Rect.top) / 2 - str_size.cy / 2 - scale;
 
-	// 2.1. Ñíà÷àëà - òåíü
+	// 2.1. Ð¡Ð½Ð°Ñ‡Ð°Ð»Ð° - Ñ‚ÐµÐ½ÑŒ
 	SetTextColor(hdc, AsConfig::BG_Color.Get_RGB() );
 	TextOut(hdc, str_left_offset + 2 * scale, str_top_offset + 2 * scale, Content.Get_Content(), Content.Get_Length() );
 
-	// 2.2. Ïîòîì - ñàìó ñòðîêó
+	// 2.2. ÐŸÐ¾Ñ‚Ð¾Ð¼ - ÑÐ°Ð¼Ñƒ ÑÑ‚Ñ€Ð¾ÐºÑƒ
 	SetTextColor(hdc, Color.Get_RGB() );
 	TextOut(hdc, str_left_offset, str_top_offset, Content.Get_Content(), Content.Get_Length() );
 }
 //------------------------------------------------------------------------------------------------------------
 bool ALabel::Append(wchar_t symbol)
 {
-	// 1. Ïîäíèìàåì ðåãèñòð àíãëèéñêèõ áóêâ
+	// 1. ÐŸÐ¾Ð´Ð½Ð¸Ð¼Ð°ÐµÐ¼ Ñ€ÐµÐ³Ð¸ÑÑ‚Ñ€ Ð°Ð½Ð³Ð»Ð¸Ð¹ÑÐºÐ¸Ñ… Ð±ÑƒÐºÐ²
 	if (symbol >= L'a' && symbol <= L'z')
 		symbol -= L'a' - L'A';
 
-	// 2. Ïîäíèìàåì ðåãèñòð êèðèëëè÷åñêèõ áóêâ
+	// 2. ÐŸÐ¾Ð´Ð½Ð¸Ð¼Ð°ÐµÐ¼ Ñ€ÐµÐ³Ð¸ÑÑ‚Ñ€ ÐºÐ¸Ñ€Ð¸Ð»Ð»Ð¸Ñ‡ÐµÑÐºÐ¸Ñ… Ð±ÑƒÐºÐ²
 	if (symbol >= 0x430 && symbol <= 0x44f)
 		symbol -= 0x20;
 
@@ -61,7 +61,7 @@ bool ALabel::Append(wchar_t symbol)
 		symbol -= 0x50;
 
 	if (symbol == 8)
-		// 3. Óäàëåíèå ñèìâîëà îáðàáàòûâàåì îñîáî
+		// 3. Ð£Ð´Ð°Ð»ÐµÐ½Ð¸Ðµ ÑÐ¸Ð¼Ð²Ð¾Ð»Ð° Ð¾Ð±Ñ€Ð°Ð±Ð°Ñ‚Ñ‹Ð²Ð°ÐµÐ¼ Ð¾ÑÐ¾Ð±Ð¾
 		Content.Delete_Last_Symbol();
 	else
 	{

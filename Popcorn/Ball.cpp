@@ -6,7 +6,7 @@ AHit_Checker_List ABall::Hit_Checker_List;
 ABall::ABall()
 : Ball_State(EBall_State::Disabled), Prev_Ball_State(EBall_State::Disabled), Release_Timer_Tick(0), Center_X_Pos(0.0), Center_Y_Pos(0.0),
   Ball_Speed(0.0), Prev_Ball_Speed(0.0), Ball_Direction(0.0), Prev_Ball_Direction(0.0), Testing_Is_Active(false),
-  Test_Iteration(0), Ball_Rect{}, Prev_Ball_Rect{}
+  Test_Iteration(0), Ball_Rect{}, Prev_Ball_Rect{}, Recent_Hits_Pos(0), Recent_Hits_Count(0)
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -65,6 +65,9 @@ void ABall::Advance(double max_speed)
 				Ball_Direction += AsConfig::Min_Ball_Angle;
 				prev_hits_count = 0;
 			}
+
+			if (Detect_Hits_Cycling() )
+				Set_Direction(Ball_Direction += AsConfig::Min_Ball_Angle);
 		}
 		else
 		{
@@ -188,7 +191,7 @@ void ABall::Set_Direction(double new_direction)
 	// 3. Не позволим приближаться к вертикальной оси ближе, чем на угол AsConfig::Min_Ball_Angle
 	// 3.1. Сверху
 	// 3.1.1. Справа
-	if (new_direction < M_PI_2 - min_angle && new_direction < M_PI_2)
+	if (new_direction > M_PI_2 - min_angle && new_direction < M_PI_2)
 		new_direction = M_PI_2 - min_angle;
 
 	// 3.1.1. Слева
@@ -218,7 +221,6 @@ void ABall::Set_State(EBall_State new_state, double x_pos, double y_pos)
 	{
 	case EBall_State::Disabled:
 		Ball_Speed = 0.0;
-		//Rest_Distance = 0.0;
 		break;
 
 
@@ -226,7 +228,6 @@ void ABall::Set_State(EBall_State new_state, double x_pos, double y_pos)
 		Center_X_Pos = x_pos;
 		Center_Y_Pos = y_pos;
 		Ball_Speed = AsConfig::Normal_Ball_Speed;
-		//Rest_Distance = 0.0;
 		Ball_Direction = M_PI_4;
 		Redraw_Ball();
 		break;
@@ -247,9 +248,7 @@ void ABall::Set_State(EBall_State new_state, double x_pos, double y_pos)
 		Center_Y_Pos = y_pos;
 		Prev_Ball_Speed = Ball_Speed;
 		Ball_Speed = 0.0;
-		//Rest_Distance = 0.0;
 		Prev_Ball_Direction = Ball_Direction;
-		//Ball_Direction = M_PI_4;
 		Release_Timer_Tick = AsConfig::Current_Timer_Tick + On_Platform_Timeout;
 		Redraw_Ball();
 		break;
@@ -265,7 +264,6 @@ void ABall::Set_State(EBall_State new_state, double x_pos, double y_pos)
 			AsConfig::Throw();  // В это состояние можно перейти только из EBall_State::On_Parachute!
 
 		Ball_Speed = 0.0;
-		//Rest_Distance = 0.0;
 		Redraw_Ball();
 		Redraw_Parachute();
 		break;
@@ -278,7 +276,6 @@ void ABall::Set_State(EBall_State new_state, double x_pos, double y_pos)
 		Center_X_Pos = x_pos;
 		Center_Y_Pos = y_pos;
 		Ball_Speed = 0.0;
-		//Rest_Distance = 0.0;
 		Redraw_Ball();
 
 		if (Ball_State == EBall_State::On_Parachute)
@@ -366,10 +363,11 @@ void ABall::Set_Speed(double new_speed)
 void ABall::Set_For_Test()
 {
 	Testing_Is_Active = true;
-	Rest_Test_Distance = 50.0;
+	Rest_Test_Distance = 5000.0;
 
-	Set_State(EBall_State::Normal, 130 + Test_Iteration, 90);
-	Ball_Direction = M_PI_4;
+	//Set_State(EBall_State::Normal, 130 + Test_Iteration, 90);
+	Set_State(EBall_State::Normal, 30, 20);
+	Ball_Direction = M_PI * 2.0 - M_PI_4;
 	Ball_Speed = AsConfig::Normal_Ball_Speed;
 
 	++Test_Iteration;
@@ -500,7 +498,7 @@ void ABall::Draw_Parachute(HDC hdc, RECT &paint_area)
 	MoveToEx(hdc, Parachute_Rect.right - 4 * scale + 1, line_y, 0);
 	LineTo(hdc, ball_center_x, ball_center_y);
 
-	MoveToEx(hdc, Parachute_Rect.right, line_y - 1, 0);
+	MoveToEx(hdc, Parachute_Rect.right - 1, line_y - 1, 0);
 	LineTo(hdc, ball_center_x, ball_center_y);
 }
 //------------------------------------------------------------------------------------------------------------
@@ -509,5 +507,43 @@ void ABall::Clear_Parachute(HDC hdc)
 
 	AsConfig::BG_Color.Select(hdc);
 	AsTools::Round_Rect(hdc, Prev_Parachute_Rect);
+}
+//------------------------------------------------------------------------------------------------------------
+bool ABall::Detect_Hits_Cycling()
+{
+	int i;
+	int curr_pos;
+	int matched_pos_count;
+	int buffer_len = sizeof(Recent_Hits) / sizeof(Recent_Hits[0]);
+
+	Recent_Hits[Recent_Hits_Pos++].Set_As( (int)Center_X_Pos, (int)Center_Y_Pos);
+
+	if (Recent_Hits_Pos >= buffer_len)
+		Recent_Hits_Pos = 0;  // Заворачиваем позицию в начало буфера
+
+	++Recent_Hits_Count;
+
+	if (Recent_Hits_Count < buffer_len)
+		return false;  // Не подсчитываем повторения, пока не наберём buffer_len столкновений
+
+	// Сканируем "окнами" по 3 столкновения
+	for (curr_pos = 3; curr_pos < buffer_len; curr_pos++)
+	{
+		matched_pos_count = 0;
+
+		for (i = 0; i < 3; i++)
+		{
+			if (Recent_Hits[i] == Recent_Hits[curr_pos + i])
+				++matched_pos_count;
+		}
+
+		if (matched_pos_count == 3)
+		{
+			Recent_Hits_Count = 0;  // Начинаем набирать статистику снова, чтобы не учитывать предыдущие серии
+			return true;
+		}
+	}
+
+	return false;
 }
 //------------------------------------------------------------------------------------------------------------

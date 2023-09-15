@@ -1,4 +1,4 @@
-#include "Platform_Glue.h"
+п»ї#include "Platform_Glue.h"
 
 // AsPlatform_Glue
 const double AsPlatform_Glue::Max_Glue_Spot_Height_Ratio = 1.0;
@@ -55,7 +55,7 @@ bool AsPlatform_Glue::Act(AsBall_Set *ball_set, EPlatform_State &next_state)
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Glue::Draw_State(HDC hdc, double x_pos)
-{// Рисуем платформу с растекающимся клеем
+{// Р РёСЃСѓРµРј РїР»Р°С‚С„РѕСЂРјСѓ СЃ СЂР°СЃС‚РµРєР°СЋС‰РёРјСЃСЏ РєР»РµРµРј
 
 	HRGN region;
 	RECT glue_rect;
@@ -88,13 +88,13 @@ void AsPlatform_Glue::Reset()
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Glue::Draw_Glue_Spot(HDC hdc, double x_pos, int x_offset, int width, int height)
-{// Рисуем пятно клея
+{// Р РёСЃСѓРµРј РїСЏС‚РЅРѕ РєР»РµСЏ
 
 	RECT spot_rect;
 	int platform_top = (AsConfig::Platform_Y_Pos + 1) * AsConfig::Global_Scale;
 	int spot_height = (int)( (double)height * AsConfig::D_Global_Scale * Glue_Spot_Height_Ratio);
 
-	// Рисуем полуэллипс как "пятно" клея
+	// Р РёСЃСѓРµРј РїРѕР»СѓСЌР»Р»РёРїСЃ РєР°Рє "РїСЏС‚РЅРѕ" РєР»РµСЏ
 	spot_rect.left = (int)( (x_pos + 5.0 + (double)x_offset) * AsConfig::D_Global_Scale);
 	spot_rect.top = platform_top - spot_height;
 	spot_rect.right = spot_rect.left + width * AsConfig::Global_Scale;

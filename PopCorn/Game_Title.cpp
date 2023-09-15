@@ -1,4 +1,4 @@
-#include "Game_Title.h"
+п»ї#include "Game_Title.h"
 
 // AsGame_Title
 const double AsGame_Title::Low_Y_Pos = 135.0;
@@ -112,7 +112,7 @@ void AsGame_Title::Draw(HDC hdc, RECT &paint_area)
 //------------------------------------------------------------------------------------------------------------
 bool AsGame_Title::Is_Finished()
 {
-	return false;  //!!! Надо сделать!
+	return false;  // Р—Р°РіР»СѓС€РєР°, РїРѕРєР° РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
 }
 //------------------------------------------------------------------------------------------------------------
 void AsGame_Title::Show(bool game_over)
@@ -125,15 +125,15 @@ void AsGame_Title::Show(bool game_over)
 	{
 		title_x = 31.0;
 
-		Title_Letters.push_back(new AFinal_Letter(title_x, title_y, L'К') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 13.0, title_y, L'О') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 29.0, title_y, L'Н') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 45.0, title_y, L'Е') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 59.0, title_y, L'Ц') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 80.0, title_y, L'И') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 96.0, title_y, L'Г') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 109.0, title_y, L'Р') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 121.0, title_y, L'Ы') );
+		Title_Letters.push_back(new AFinal_Letter(title_x, title_y, L'Рљ') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 13.0, title_y, L'Рћ') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 29.0, title_y, L'Рќ') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 45.0, title_y, L'Р•') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 59.0, title_y, L'Р¦') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 80.0, title_y, L'Р') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 96.0, title_y, L'Р“') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 109.0, title_y, L'Р ') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 121.0, title_y, L'Р«') );
 
 		Game_Title_State = EGame_Title_State::Game_Over_Descent;
 	}
@@ -141,12 +141,12 @@ void AsGame_Title::Show(bool game_over)
 	{
 		title_x = 54.0;
 
-		Title_Letters.push_back(new AFinal_Letter(title_x, title_y, L'П') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 16.0, title_y, L'О') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 33.0, title_y, L'Б') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 46.0, title_y, L'Е') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 59.0, title_y, L'Д') );
-		Title_Letters.push_back(new AFinal_Letter(title_x + 75.0, title_y, L'А') );
+		Title_Letters.push_back(new AFinal_Letter(title_x, title_y, L'Рџ') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 16.0, title_y, L'Рћ') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 33.0, title_y, L'Р‘') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 46.0, title_y, L'Р•') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 59.0, title_y, L'Р”') );
+		Title_Letters.push_back(new AFinal_Letter(title_x + 75.0, title_y, L'Рђ') );
 		Title_Letters.push_back(new AFinal_Letter(title_x + 91.0, title_y, L'!') );
 
 		Game_Title_State = EGame_Title_State::Game_Won_Descent;
@@ -179,7 +179,7 @@ void AsGame_Title::Destroy_Letters(int curr_tick)
 	bool all_letters_are_finished = true;
 
 	if (Destroy_Index == -1 || curr_tick % Destroy_Delay == 0)
-	{// Условие сработает каждый Destroy_Delay тик
+	{// РЈСЃР»РѕРІРёРµ СЃСЂР°Р±РѕС‚Р°РµС‚ РєР°Р¶РґС‹Р№ Destroy_Delay С‚РёРє
 
 		++Destroy_Index;
 

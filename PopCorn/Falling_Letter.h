@@ -1,23 +1,23 @@
-#pragma once
+п»ї#pragma once
 
 #include "Active_Brick.h"
 
 //------------------------------------------------------------------------------------------------------------
 enum class ELetter_Type: unsigned char
 {
-	O,  // "Отмена"
-	I,  // "Инверсия"
-	C,  // "Скорость"
-	M,  // "Монстры"
-	G,  // "Жизнь"
-	K,  // "Клей"
-	W,  // "Шире"
+	O,  // "РћС‚РјРµРЅР°"
+	I,  // "РРЅРІРµСЂСЃРёСЏ"
+	C,  // "РЎРєРѕСЂРѕСЃС‚СЊ"
+	M,  // "РњРѕРЅСЃС‚СЂС‹"
+	G,  // "Р–РёР·РЅСЊ"
+	K,  // "РљР»РµР№"
+	W,  // "РЁРёСЂРµ"
 
-	T,  // "Три"
-	L,  // "Лазер"
-	P,  // "Пол"
+	T,  // "РўСЂРё"
+	L,  // "Р›Р°Р·РµСЂ"
+	P,  // "РџРѕР»"
 
-	Plus,  // Переход на следующий уровень
+	Plus,  // РџРµСЂРµС…РѕРґ РЅР° СЃР»РµРґСѓСЋС‰РёР№ СѓСЂРѕРІРµРЅСЊ
 
 	Max
 };
@@ -25,8 +25,8 @@ enum class ELetter_Type: unsigned char
 enum class EFalling_Letter_State: unsigned char
 {
 	Normal,
-	Finalizing,  // Начинаем удалять объект
-	Finished  // Когда объект можно удалять
+	Finalizing,  // РќР°С‡РёРЅР°РµРј СѓРґР°Р»СЏС‚СЊ РѕР±СЉРµРєС‚
+	Finished  // РљРѕРіРґР° РѕР±СЉРµРєС‚ РјРѕР¶РЅРѕ СѓРґР°Р»СЏС‚СЊ
 };
 //------------------------------------------------------------------------------------------------------------
 class AFalling_Letter: public AGraphics_Object
@@ -68,6 +68,6 @@ private:
 	static const int Brick_Half_Height = AsConfig::Brick_Height * AsConfig::Global_Scale / 2;
 
 	static int All_Letters_Popularity;
-	static int Letters_Popularity[ (int)ELetter_Type::Max];  // "Вес" каждой буквы
+	static int Letters_Popularity[ (int)ELetter_Type::Max];  // "Р’РµСЃ" РєР°Р¶РґРѕР№ Р±СѓРєРІС‹
 };
 //------------------------------------------------------------------------------------------------------------

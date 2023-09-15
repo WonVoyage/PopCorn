@@ -1,21 +1,5 @@
 ﻿#include "Level.h"
 
-// APoint
-//------------------------------------------------------------------------------------------------------------
-APoint::APoint()
-: X(0), Y(0)
-{
-}
-//------------------------------------------------------------------------------------------------------------
-APoint::APoint(int x, int y)
-: X(x), Y(y)
-{
-}
-//------------------------------------------------------------------------------------------------------------
-
-
-
-
 // AsLevel
 //------------------------------------------------------------------------------------------------------------
 AsLevel *AsLevel::Level = 0;
@@ -253,9 +237,9 @@ void AsLevel::Init()
 
 	memset(Current_Level, 0, sizeof(Current_Level) );
 
-	for (i = 0; i < ALevel_Data::Max_Level_Number; i++)
+	for (i = 0; i <= ALevel_Data::Max_Level_Number; i++)
 	{
-		level_data = new ALevel_Data(i + 1);
+		level_data = new ALevel_Data(i);
 		Levels_Data.push_back(level_data);
 
 		if (i == 7)
@@ -274,12 +258,15 @@ void AsLevel::Set_Current_Level(int level_number)
 	EBrick_Type brick_type;
 	ALevel_Data *level_data;
 
-	if (level_number < 1 || level_number > (int)Levels_Data.size() )
+	if (level_number < 0 || level_number > (int)Levels_Data.size() )
 		AsConfig::Throw();
 
 	Current_Level_Number = level_number;
 
-	level_data = Levels_Data[level_number - 1];
+	if (Current_Level_Number == 0)
+		AsTools::Invalidate_Rect(Level_Rect);
+
+	level_data = Levels_Data[level_number];
 
 	memcpy(Current_Level, level_data->Level, sizeof(Current_Level) );
 
@@ -448,11 +435,12 @@ bool AsLevel::Has_Brick_At(RECT &monster_rect)
 //------------------------------------------------------------------------------------------------------------
 bool AsLevel::On_Hit(int brick_x, int brick_y, ABall_Object *ball, bool vertical_hit)
 {
-	EBrick_Type brick_type, new_brick;
+	EBrick_Type brick_type, origin_brick, new_brick;
 	bool can_reflect = true;
 	AMessage *message;
 
-	brick_type = (EBrick_Type)Current_Level[brick_y][brick_x];
+	origin_brick = (EBrick_Type)Current_Level[brick_y][brick_x];
+	brick_type = origin_brick;
 
 	if (ball == 0 && brick_type == EBrick_Type::Parachute)
 	{
@@ -473,11 +461,11 @@ bool AsLevel::On_Hit(int brick_x, int brick_y, ABall_Object *ball, bool vertical
 
 	Redraw_Brick(brick_x, brick_y);
 
-	AsInfo_Panel::Update_Score(EScore_Event_Type::Hit_Brick);
+	AsInfo_Panel::Update_Score(EScore_Event_Type::Hit_Brick, origin_brick);
 
 	new_brick = (EBrick_Type)Current_Level[brick_y][brick_x];
 
-	if (new_brick == EBrick_Type::None)
+	if (new_brick == EBrick_Type::None || (origin_brick == EBrick_Type::Ad && new_brick == EBrick_Type::Invisible) )
 		--Available_Bricks_Count;
 
 	if (Available_Bricks_Count <= 0)
@@ -520,26 +508,7 @@ bool AsLevel::Add_Falling_Letter(int brick_x, int brick_y, EBrick_Type brick_typ
 	letter_x = (brick_x * AsConfig::Cell_Width + AsConfig::Level_X_Offset) * AsConfig::Global_Scale;
 	letter_y = (brick_y * AsConfig::Cell_Height + AsConfig::Level_Y_Offset) * AsConfig::Global_Scale;
 
-	//letter_type = AFalling_Letter::Get_Random_Letter_Type();
-	switch (AsTools::Rand(4) )
-	{
-	case 0:
-		letter_type = ELetter_Type::O;
-		break;
-
-	case 1:
-		letter_type = ELetter_Type::L;
-		break;
-
-	case 2:
-		letter_type = ELetter_Type::K;
-		break;
-
-	case 3:
-		letter_type = ELetter_Type::W;
-		break;
-	}
-	//letter_type = ELetter_Type::G;
+	letter_type = AFalling_Letter::Get_Random_Letter_Type();
 
 	falling_letter = new AFalling_Letter(brick_type, letter_type, letter_x, letter_y);
 	Falling_Letters.push_back(falling_letter);

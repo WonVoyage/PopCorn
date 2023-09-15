@@ -196,6 +196,10 @@ const AColor AsConfig::Explosion_Blue_Color(White_Color, Blue_Color, 0);
 const AColor AsConfig::Shadow_Color(BG_Color, Global_Scale);
 const AColor AsConfig::Highlight_Color(White_Color, Global_Scale);
 
+AColor_Fade AsConfig::Fading_Red_Brick_Colors(Red_Color, Max_Brick_Fade_Step);
+AColor_Fade AsConfig::Fading_Blue_Brick_Colors(Blue_Color, Max_Brick_Fade_Step);
+AColor_Fade AsConfig::Fading_Blue_Mop_Indicator_Colors(Blue_Color, Red_Color, Max_Mop_Indicator_Fade_Step);
+
 const AFont AsConfig::Name_Font(-48, 700, 49, L"Consolas");
 const AFont AsConfig::Score_Font(-44, 700, 49, L"Consolas");
 const AFont AsConfig::Logo_Pop_Font(-128, 900, 34, L"Arial Black");
@@ -205,7 +209,7 @@ const AFont AsConfig::Game_Over_Font(-60, 700, 66, L"Comic Sans MS", true);
 const double AsConfig::D_Global_Scale = (double)Global_Scale;
 const double AsConfig::Moving_Step_Size = 1.0 / Global_Scale;
 const double AsConfig::Start_Ball_Y_Pos = 184.0;
-const double AsConfig::Ball_Acceleration = 1.001;
+const double AsConfig::Ball_Acceleration = 1.0005;
 const double AsConfig::Normal_Ball_Speed = 3.0;
 const double AsConfig::Min_Ball_Angle = M_PI / 8.0;
 const double AsConfig::Ball_Radius = 2.0 - 0.5 / Global_Scale;

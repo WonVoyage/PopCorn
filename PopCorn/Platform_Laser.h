@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "Platform_State.h"
 #include "Laser_Beam_Set.h"
@@ -35,6 +35,6 @@ private:
 	AsLaser_Beam_Set *Laser_Beam_Set;  // UNO
 
 	static const int Max_Laser_Transformation_Step = 20;
-	static const int Laser_Shot_Timeout = AsConfig::FPS / 2;  // 2 раза в секунду
+	static const int Laser_Shot_Timeout = AsConfig::FPS / 2;  // 2 СЂР°Р·Р° РІ СЃРµРєСѓРЅРґСѓ
 };
 //------------------------------------------------------------------------------------------------------------

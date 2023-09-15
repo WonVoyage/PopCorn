@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Mop_Cylinder.h"
 #include "Mop_Indicator.h"
@@ -16,16 +16,11 @@ enum class EMop_State: unsigned char
 	Descend_Done
 };
 //------------------------------------------------------------------------------------------------------------
-class AsMop: public AGame_Object
+class AsMop: public AGraphics_Object
 {
 public:
 	~AsMop();
 	AsMop();
-
-	virtual void Begin_Movement();
-	virtual void Finish_Movement();
-	virtual void Advance(double max_speed);
-	virtual double Get_Speed();
 
 	virtual void Act();
 	virtual void Clear(HDC hdc, RECT &paint_area);

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Label.h"
 
@@ -24,7 +24,6 @@ public:
 	void Hide();
 
 private:
-	//bool Is_Visible;
 	ELevel_Title_State Level_Title_State;
 	RECT Title_Rect;
 	ALabel Level_Name, Level_Number;

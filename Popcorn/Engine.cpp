@@ -39,12 +39,6 @@ void AsEngine::Init_Engine(HWND hwnd)
 
 	AsPlatform::Hit_Checker_List.Add_Hit_Checker(&Monster_Set);
 
-	//Level.Set_Current_Level(1);
-
-	//Ball.Set_State(EBall_State::Normal, Platform.X_Pos + Platform.Width / 2);
-	//Platform.Set_State(EPS_Normal);
-	//Platform.Set_State(EPlatform_State::Laser);
-
 	Platform.Redraw_Platform();
 
 	SetTimer(AsConfig::Hwnd, Timer_ID, 1000 / AsConfig::FPS, 0);
@@ -103,6 +97,7 @@ int AsEngine::On_Timer()
 	{
 	case EGame_State::Test_Ball:
 		Ball_Set.Set_For_Test();
+		Level.Set_Current_Level(0);
 		Game_State = EGame_State::Play_Level;
 		break;
 
@@ -143,7 +138,7 @@ int AsEngine::On_Timer()
 		{
 			Game_State = EGame_State::Play_Level;
 			Ball_Set.Set_On_Platform(Platform.Get_Middle_Pos() );
-			Monster_Set.Activate(7);
+			Monster_Set.Activate(AsConfig::Max_Monsters_Count);
 			Level.Hide_Title();
 		}
 		break;
@@ -175,7 +170,8 @@ int AsEngine::On_Timer()
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::On_Char(wchar_t symbol)
 {
-	Got_Name = Info_Panel.Edit_Player_Name(symbol);
+	if (! Got_Name)
+		Got_Name = Info_Panel.Edit_Player_Name(symbol);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsEngine::Is_Destroying_Complete()
@@ -213,6 +209,7 @@ void AsEngine::Play_Level()
 void AsEngine::Stop_Play()
 {
 	Level.Stop();
+	Set_Floor_State(false);
 	Monster_Set.Destroy_All();
 	Laser_Beam_Set.Disable_All();
 	Platform.Set_State(EPlatform_State::Meltdown);
@@ -298,8 +295,7 @@ void AsEngine::Handle_Message()
 		switch (message->Message_Type)
 		{
 		case EMessage_Type::Floor_Is_Over:
-			AsConfig::Level_Has_Floor = false;
-			Border.Redraw_Floor();
+			Set_Floor_State(false);
 			delete message;
 			break;
 
@@ -374,13 +370,14 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
 		break;
 
 	case ELetter_Type::P:  // "Пол"
-		AsConfig::Level_Has_Floor = true;
-		Border.Redraw_Floor();
+		Set_Floor_State(true);
 		Info_Panel.Floor_Indicator.Restart();  // Отобразить на индикаторе
 		Platform.Set_State(EPlatform_Substate_Regular::Normal);
 		break;
 
-	//case ELetter_Type::Plus:  // Переход на следующий уровень
+	case ELetter_Type::Plus:  // Переход на следующий уровень
+		break;  // Обработка "+" не сделана
+
 	default:
 		AsConfig::Throw();
 	}
@@ -388,5 +385,11 @@ void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
 	falling_letter->Finalize();
 
 	AsInfo_Panel::Update_Score(EScore_Event_Type::Catch_Letter);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsEngine::Set_Floor_State(bool turn_on)
+{
+	AsConfig::Level_Has_Floor = turn_on;
+	Border.Redraw_Floor();
 }
 //------------------------------------------------------------------------------------------------------------

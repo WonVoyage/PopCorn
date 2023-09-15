@@ -1,4 +1,4 @@
-#include "Platform_Expanding.h"
+п»ї#include "Platform_Expanding.h"
 
 // AsPlatform_Expanding
 const double AsPlatform_Expanding::Max_Expanding_Platform_Width = 40.0;
@@ -72,7 +72,7 @@ bool AsPlatform_Expanding::Act(double &x_pos, EPlatform_State &next_state, bool 
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Expanding::Draw_State(HDC hdc, double x)
-{// Рисуем расширяющуюся платформу
+{// Р РёСЃСѓРµРј СЂР°СЃС€РёСЂСЏСЋС‰СѓСЋСЃСЏ РїР»Р°С‚С„РѕСЂРјСѓ
 
 	int y = AsConfig::Platform_Y_Pos;
 	const int scale = AsConfig::Global_Scale;
@@ -84,27 +84,27 @@ void AsPlatform_Expanding::Draw_State(HDC hdc, double x)
 	inner_rect.right = inner_rect.left + AsConfig::Platform_Expanding_Inner_Width * scale;
 	inner_rect.bottom = (y + 1 + 5) * scale;
 
-	// 1. Левая сторона
-	// 1.1. Шарик
+	// 1. Р›РµРІР°СЏ СЃС‚РѕСЂРѕРЅР°
+	// 1.1. РЁР°СЂРёРє
 	Draw_Expanding_Platform_Ball(hdc, x, true);
 
-	// 1.2. Фермы
+	// 1.2. Р¤РµСЂРјС‹
 	Draw_Expanding_Truss(hdc, inner_rect, true);
 
-	// 2. Правая сторона
-	// 2.1. Шарик
+	// 2. РџСЂР°РІР°СЏ СЃС‚РѕСЂРѕРЅР°
+	// 2.1. РЁР°СЂРёРє
 	Draw_Expanding_Platform_Ball(hdc, x, false);
 
-	// 2.2. Фермы
+	// 2.2. Р¤РµСЂРјС‹
 	Draw_Expanding_Truss(hdc, inner_rect, false);
 
 
-	// 3. Рисуем среднюю часть
+	// 3. Р РёСЃСѓРµРј СЃСЂРµРґРЅСЋСЋ С‡Р°СЃС‚СЊ
 	AsTools::Rect(hdc, inner_rect, *Inner_Color);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Expanding::Draw_Circle_Highlight(HDC hdc, int x, int y)
-{// Рисуем блик на шарике
+{// Р РёСЃСѓРµРј Р±Р»РёРє РЅР° С€Р°СЂРёРєРµ
 
 	const int scale = AsConfig::Global_Scale;
 	int size = (AsConfig::Platform_Circle_Size - 1) * scale - 1;
@@ -120,7 +120,7 @@ void AsPlatform_Expanding::Reset()
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Expanding::Draw_Expanding_Platform_Ball(HDC hdc, double x, bool is_left)
-{// Рисуем боковой шарик расширяющейся платформы
+{// Р РёСЃСѓРµРј Р±РѕРєРѕРІРѕР№ С€Р°СЂРёРє СЂР°СЃС€РёСЂСЏСЋС‰РµР№СЃСЏ РїР»Р°С‚С„РѕСЂРјС‹
 
 	int y = AsConfig::Platform_Y_Pos;
 	int arc_mid_x;
@@ -129,7 +129,7 @@ void AsPlatform_Expanding::Draw_Expanding_Platform_Ball(HDC hdc, double x, bool 
 	const double d_scale = AsConfig::D_Global_Scale;
 	RECT rect, arc_rect;
 
-	// 1.1. Шарик
+	// 1.1. РЁР°СЂРёРє
 	if (is_left)
 		rect.left = (int)(x * d_scale);
 	else
@@ -141,16 +141,16 @@ void AsPlatform_Expanding::Draw_Expanding_Platform_Ball(HDC hdc, double x, bool 
 
 	AsTools::Ellipse(hdc, rect, *Circle_Color);
 
-	// 1.2. Переходник на ферму
+	// 1.2. РџРµСЂРµС…РѕРґРЅРёРє РЅР° С„РµСЂРјСѓ
 	if (is_left)
 		Rectangle(hdc, rect.left + 4 * scale, rect.top, rect.right - scale + 1, rect.bottom - 1);
 	else
 		Rectangle(hdc, rect.left + 1, rect.top, rect.left + 3 * scale, rect.bottom - 1);
 
-	// 1.3. Рисуем блик
+	// 1.3. Р РёСЃСѓРµРј Р±Р»РёРє
 	Draw_Circle_Highlight(hdc, (int)(x * d_scale), y * scale);
 
-	// 1.4. Дуга фермы на шарике
+	// 1.4. Р”СѓРіР° С„РµСЂРјС‹ РЅР° С€Р°СЂРёРєРµ
 	arc_rect.left = rect.left + 4 * scale + 2;
 	arc_rect.top = rect.top + scale + 1;
 	arc_rect.right = rect.left + (4 + 3) * scale + 2;
@@ -175,16 +175,16 @@ void AsPlatform_Expanding::Draw_Expanding_Platform_Ball(HDC hdc, double x, bool 
 		arc_mid_x -= arc_right_offset;
 	}
 
-	// 1.4.1. Дырка в шарике под дугой
+	// 1.4.1. Р”С‹СЂРєР° РІ С€Р°СЂРёРєРµ РїРѕРґ РґСѓРіРѕР№
 	AsTools::Ellipse(hdc, arc_rect, AsConfig::BG_Color);
 
-	// 1.4.2. Сама дуга
+	// 1.4.2. РЎР°РјР° РґСѓРіР°
 	Truss_Color->Select(hdc);
 	Arc(hdc, arc_rect.left, arc_rect.top, arc_rect.right - 1, arc_rect.bottom - 1,  arc_mid_x, arc_start_y, arc_mid_x, arc_end_y);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Expanding::Draw_Expanding_Truss(HDC hdc, RECT &inner_rect, bool is_left)
-{// Рисуем фермы расширяющейся платформы
+{// Р РёСЃСѓРµРј С„РµСЂРјС‹ СЂР°СЃС€РёСЂСЏСЋС‰РµР№СЃСЏ РїР»Р°С‚С„РѕСЂРјС‹
 
 	int truss_x;
 	int truss_top_y, truss_low_y;

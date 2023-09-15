@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include <Windows.h>
 
@@ -11,7 +11,7 @@
 //------------------------------------------------------------------------------------------------------------
 enum class EBall_State: unsigned char
 {
-	Disabled,  // Отключён (не рисуется, не перемещается и не взаимодействует)
+	Disabled,  // РћС‚РєР»СЋС‡С‘РЅ (РЅРµ СЂРёСЃСѓРµС‚СЃСЏ, РЅРµ РїРµСЂРµРјРµС‰Р°РµС‚СЃСЏ Рё РЅРµ РІР·Р°РёРјРѕРґРµР№СЃС‚РІСѓРµС‚)
 
 	Normal,
 	Lost,
@@ -77,6 +77,19 @@ public:
 
 protected:
 	virtual bool Get_Next_Game_Object(int &index, AGame_Object **game_obj) = 0;
+};
+//------------------------------------------------------------------------------------------------------------
+class APoint
+{
+public:
+	APoint();
+	APoint(int x, int y);
+
+	bool operator == (const APoint &another);
+
+	void Set_As(int x, int y);
+
+	int X, Y;
 };
 //------------------------------------------------------------------------------------------------------------
 class AString

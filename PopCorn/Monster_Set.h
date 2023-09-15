@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Border.h"
 #include "Monster.h"
@@ -39,8 +39,6 @@ private:
 	int Current_Gate_Index;
 	int Max_Alive_Monsters_Count;
 	AsBorder *Border;  // UNO
-
-	static const int Max_Monsters_Count = 10;
 
 	std::vector<AMonster *> Monsters;
 };

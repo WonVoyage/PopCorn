@@ -74,7 +74,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 AsMain_Window *AsMain_Window::Self = 0;
 //------------------------------------------------------------------------------------------------------------
 AsMain_Window::AsMain_Window()
-: Instance(0), szTitle{}, szWindowClass{}
+: Instance(0)
 {
 	Self = this;
 }
@@ -83,12 +83,17 @@ int APIENTRY AsMain_Window::Main(HINSTANCE instance, int command_show)
 {
 	HACCEL accel_table;
 	MSG msg;
+	wchar_t str_buf[Max_String_Size];
 
 	Instance = instance; // Store instance handle in our global variable
 
 	// Initialize global strings
-	LoadStringW(Instance, IDS_APP_TITLE, szTitle, Max_String_Size);
-	LoadStringW(Instance, IDC_POPCORN, szWindowClass, Max_String_Size);
+	LoadStringW(Instance, IDS_APP_TITLE, str_buf, Max_String_Size);
+	Title = str_buf;
+
+	LoadStringW(Instance, IDC_POPCORN, str_buf, Max_String_Size);
+	Window_Class_Name = str_buf;
+
 	Register_Class();
 
 	// Perform application initialization:
@@ -126,7 +131,7 @@ ATOM AsMain_Window::Register_Class()
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wcex.hbrBackground = AsConfig::BG_Color.Get_Brush();
 	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_POPCORN);
-	wcex.lpszClassName = szWindowClass;
+	wcex.lpszClassName = Window_Class_Name.Get_Content();
 	wcex.hIconSm = LoadIcon(Instance, MAKEINTRESOURCE(IDI_SMALL));
 
 	return RegisterClassExW(&wcex);
@@ -142,9 +147,9 @@ BOOL AsMain_Window::Init_Instance(int command_show)
 	window_rect.right = 320 * 3;
 	window_rect.bottom = 200 * 3;
 
-	AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW, TRUE);
+	AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW - WS_THICKFRAME, TRUE);
 
-	hwnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, 0, 0, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top, 0, 0, Instance, 0);
+	hwnd = CreateWindowW(Window_Class_Name.Get_Content(), Title.Get_Content(), WS_OVERLAPPEDWINDOW - WS_THICKFRAME, 0, 0, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top, 0, 0, Instance, 0);
 
 	if (hwnd == 0)
 		return FALSE;
@@ -392,10 +397,10 @@ V 5. Окно дополнительных жизней
 V 6. Учёт игровых действий и отображение на индикаторах
 
 
-Игра и уровни
+V Игра и уровни
 V 1. Список первых 10 уровней
-2. Состояния игры:
-2.1. Заставка
+V 2. Состояния игры:
+V 2.1. Заставка
 V 2.2. Анимация начала уровня
 V 2.3. Играем уровень
 V 2.4. Потеря жизни
@@ -404,10 +409,10 @@ V 2.5.1. Нормальный
 X 2.5.2. Досрочный
 X 2.6. Окончание игры
 
-3. Финальная настройка
-3.1. Исправляем 1-й уровень
-3.2. Играем и исправляем ошибки
-3.3. Компилим в релизе
+V 3. Финальная настройка
+V 3.1. Исправляем 1-й уровень
+V 3.2. Играем и исправляем ошибки
+V 3.3. Компилим в релизе
 
 
 

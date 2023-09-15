@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "Config.h"
 
@@ -35,7 +35,7 @@ public:
 	void Get_Y_Size(int &gate_top_y, int &gate_low_y);
 	void Get_Pos(int &gate_x_pos, int &gate_y_pos);
 
-	int Level_X_Pos, Level_Y_Pos;  // Позиция на уровне, соответствующая верхнему кирпичу напротив гейта (-1, если гейт не находится напротив кирпичей)
+	int Level_X_Pos, Level_Y_Pos;  // РџРѕР·РёС†РёСЏ РЅР° СѓСЂРѕРІРЅРµ, СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰Р°СЏ РІРµСЂС…РЅРµРјСѓ РєРёСЂРїРёС‡Сѓ РЅР°РїСЂРѕС‚РёРІ РіРµР№С‚Р° (-1, РµСЃР»Рё РіРµР№С‚ РЅРµ РЅР°С…РѕРґРёС‚СЃСЏ РЅР°РїСЂРѕС‚РёРІ РєРёСЂРїРёС‡РµР№)
 
 	static const int Width = 6;
 	static const int Height = 19;
@@ -62,7 +62,7 @@ private:
 
 	static const double Max_Gap_Short_Height, Gap_Height_Short_Step;
 	static const double Max_Gap_Long_Height, Gap_Height_Long_Step;
-	static const int Short_Opening_Timeout = AsConfig::FPS;  // 1 секунда
-	static const int Long_Opening_Timeout = AsConfig::FPS * 3;  // 3 секунды
+	static const int Short_Opening_Timeout = AsConfig::FPS;  // 1 СЃРµРєСѓРЅРґР°
+	static const int Long_Opening_Timeout = AsConfig::FPS * 3;  // 3 СЃРµРєСѓРЅРґС‹
 };
 //------------------------------------------------------------------------------------------------------------

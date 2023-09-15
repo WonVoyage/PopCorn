@@ -1,4 +1,4 @@
-#include "Final_Letter.h"
+п»ї#include "Final_Letter.h"
 
 // AFinal_Letter
 //------------------------------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ void AFinal_Letter::Act()
 //------------------------------------------------------------------------------------------------------------
 void AFinal_Letter::Clear(HDC hdc, RECT &paint_area)
 {
-	//!!! Надо сделать!
+	// Р—Р°РіР»СѓС€РєР°, РїРѕРєР° РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
 }
 //------------------------------------------------------------------------------------------------------------
 void AFinal_Letter::Draw(HDC hdc, RECT &paint_area)
@@ -38,7 +38,7 @@ void AFinal_Letter::Draw(HDC hdc, RECT &paint_area)
 		{
 			GetTextExtentPoint32(hdc, &Letter, 1, &letter_size);
 
-			Width = letter_size.cx + letter_size.cx / 3;  // 133% ширины
+			Width = letter_size.cx + letter_size.cx / 3;  // 133% С€РёСЂРёРЅС‹
 			Height = letter_size.cy;
 
 			Got_Letter_Size = true;

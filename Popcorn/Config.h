@@ -70,6 +70,10 @@ public:
 	static const AColor Shadow_Color, Highlight_Color;
 	static const AFont Name_Font, Score_Font, Logo_Pop_Font, Logo_Corn_Font, Game_Over_Font;
 
+	static AColor_Fade Fading_Red_Brick_Colors;
+	static AColor_Fade Fading_Blue_Brick_Colors;
+	static AColor_Fade Fading_Blue_Mop_Indicator_Colors;
+
 	static const double D_Global_Scale;
 	static const double Moving_Step_Size;
 	static const double Start_Ball_Y_Pos;
@@ -93,12 +97,12 @@ public:
 	static const int Max_Y_Pos = 199;
 	static const int Platform_Y_Pos = 185;
 	static const int FPS = 20;
-	static const int Max_Active_Bricks_Count = 10;
-	static const int Hits_Per_Letter = 1;  // Вероятность выбить букву = 1.0 / Hits_Per_Letter
+	static const int Max_Active_Bricks_Count = 40;
+	static const int Hits_Per_Letter = 4;  // Вероятность выбить букву = 1.0 / Hits_Per_Letter
 	static const int Max_Falling_Letters_Count = 10;
 	static const int Max_Balls_Count = 10;
 	static const int Max_Movers_Count = 10;
-	static const int Initial_Life_Count = 0;
+	static const int Initial_Life_Count = 5;
 	static const int Max_Life_Count = 12;
 	static const int Floor_Y_Pos = Max_Y_Pos - 1;
 	static const int Platform_Normal_Width = 28;
@@ -107,6 +111,9 @@ public:
 	static const int Platform_Normal_Inner_Width = Platform_Normal_Width - Platform_Circle_Size;
 	static const int Platform_Expanding_Inner_Width = 12;
 	static const int Gates_Count = 8;
+	static const int Max_Monsters_Count = 3;
+	static const int Max_Brick_Fade_Step = FPS;
+	static const int Max_Mop_Indicator_Fade_Step = FPS * 4 / 10;  // 0.4 секунды
 };
 //------------------------------------------------------------------------------------------------------------
 class AsTools

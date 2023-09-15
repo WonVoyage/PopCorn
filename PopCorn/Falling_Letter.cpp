@@ -1,4 +1,4 @@
-#include "Falling_Letter.h"
+п»ї#include "Falling_Letter.h"
 
 // AFalling_Letter
 int AFalling_Letter::All_Letters_Popularity;
@@ -47,7 +47,7 @@ void AFalling_Letter::Clear(HDC hdc, RECT &paint_area)
 {
 	RECT intersection_rect;
 
-	// Стираем предыдущее изображение
+	// РЎС‚РёСЂР°РµРј РїСЂРµРґС‹РґСѓС‰РµРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
 	if (! IntersectRect(&intersection_rect, &paint_area, &Prev_Letter_Cell) )
 		return;
 
@@ -154,20 +154,20 @@ void AFalling_Letter::Set_Brick_Letter_Colors(bool is_switch_color, const AColor
 }
 //------------------------------------------------------------------------------------------------------------
 void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
-{// Вывод падающей буквы
+{// Р’С‹РІРѕРґ РїР°РґР°СЋС‰РµР№ Р±СѓРєРІС‹
 
 	bool switch_color;
 	double offset;
-	double rotation_angle;  // Преобразование шага в угол поворота
+	double rotation_angle;  // РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ С€Р°РіР° РІ СѓРіРѕР» РїРѕРІРѕСЂРѕС‚Р°
 	double y_ratio;
 	int back_part_offset;
 	const AColor *front_color, *back_color;
 	XFORM xform, old_xform;
 
 	if (! (Brick_Type == EBrick_Type::Blue || Brick_Type == EBrick_Type::Red))
-		return;  // Падающие буквы могут быть только от кирпичей такого типа
+		return;  // РџР°РґР°СЋС‰РёРµ Р±СѓРєРІС‹ РјРѕРіСѓС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ РѕС‚ РєРёСЂРїРёС‡РµР№ С‚Р°РєРѕРіРѕ С‚РёРїР°
 
-	// Корректируем шаг вращения и угол поворота
+	// РљРѕСЂСЂРµРєС‚РёСЂСѓРµРј С€Р°Рі РІСЂР°С‰РµРЅРёСЏ Рё СѓРіРѕР» РїРѕРІРѕСЂРѕС‚Р°
 	Rotation_Step = Rotation_Step % Max_Rotation_Step;
 
 	if (Rotation_Step < 8)
@@ -195,17 +195,17 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
 
 	if (Rotation_Step == 4 || Rotation_Step == 12)
 	{
-		// Выводим фон
+		// Р’С‹РІРѕРґРёРј С„РѕРЅ
 		back_color->Select(hdc);
-		Rectangle(hdc, X, Y + Brick_Half_Height - AsConfig::Global_Scale, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + Brick_Half_Height);
+		Rectangle(hdc, X, Y + Brick_Half_Height - AsConfig::Global_Scale, X + AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Y + Brick_Half_Height - 1);
 
-		// Выводим передний план
+		// Р’С‹РІРѕРґРёРј РїРµСЂРµРґРЅРёР№ РїР»Р°РЅ
 		front_color->Select(hdc);
-		Rectangle(hdc, X, Y + Brick_Half_Height, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + Brick_Half_Height + AsConfig::Global_Scale - 1);
+		Rectangle(hdc, X, Y + Brick_Half_Height, X + AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Y + Brick_Half_Height + AsConfig::Global_Scale - 1);
 	}
 	else
 	{
-		// Настраиваем матрицу "переворота" буквы
+		// РќР°СЃС‚СЂР°РёРІР°РµРј РјР°С‚СЂРёС†Сѓ "РїРµСЂРµРІРѕСЂРѕС‚Р°" Р±СѓРєРІС‹
 		y_ratio = cos(rotation_angle);
 
 		xform.eM11 = 1.0f;
@@ -217,7 +217,7 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
 		GetWorldTransform(hdc, &old_xform);
 		SetWorldTransform(hdc, &xform);
 
-		// Выводим фон
+		// Р’С‹РІРѕРґРёРј С„РѕРЅ
 		back_color->Select(hdc);
 
 		offset = 3.0 * (1.0 - fabs(xform.eM22)) * AsConfig::D_Global_Scale;
@@ -226,12 +226,12 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
 		if (y_ratio < 0.0)
 			back_part_offset = -back_part_offset;
 
-		Rectangle(hdc, 0, -Brick_Half_Height - back_part_offset, AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Brick_Half_Height - back_part_offset);
+		Rectangle(hdc, 0, -Brick_Half_Height - back_part_offset, AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Brick_Half_Height - back_part_offset - 1);
 
-		// Выводим передний план
+		// Р’С‹РІРѕРґРёРј РїРµСЂРµРґРЅРёР№ РїР»Р°РЅ
 		front_color->Select(hdc);
 
-		Rectangle(hdc, 0, -Brick_Half_Height, AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Brick_Half_Height);
+		Rectangle(hdc, 0, -Brick_Half_Height, AsConfig::Brick_Width * AsConfig::Global_Scale - 1, Brick_Half_Height - 1);
 
 		if (Rotation_Step > 4 && Rotation_Step <= 12)
 		{
@@ -239,28 +239,28 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
 
 			switch (Letter_Type)
 			{
-			case ELetter_Type::O:  // "Отмена"
+			case ELetter_Type::O:  // "РћС‚РјРµРЅР°"
 				Ellipse(hdc, 0 + 5 * AsConfig::Global_Scale, 1 * AsConfig::Global_Scale - Brick_Half_Height, 0 + 10 * AsConfig::Global_Scale, 6 * AsConfig::Global_Scale - Brick_Half_Height - 1);
 				break;
 
-			case ELetter_Type::I:  // "Инверсия"
+			case ELetter_Type::I:  // "РРЅРІРµСЂСЃРёСЏ"
 				Draw_Line(hdc, 5, 1, 5, 6);
 				Draw_Line_To(hdc, 9, 1);
 				Draw_Line_To(hdc, 9, 6);
 				break;
 
-			case ELetter_Type::C:  // "Скорость"
+			case ELetter_Type::C:  // "РЎРєРѕСЂРѕСЃС‚СЊ"
 				Draw_C(hdc);
 				break;
 
-			case ELetter_Type::M:  // "Монстры"
+			case ELetter_Type::M:  // "РњРѕРЅСЃС‚СЂС‹"
 				Draw_Line(hdc, 5, 6, 5, 1);
 				Draw_Line_To(hdc, 7, 3);
 				Draw_Line_To(hdc, 9, 1);
 				Draw_Line_To(hdc, 9, 6);
 				break;
 
-			case ELetter_Type::G:  // "Жизнь"
+			case ELetter_Type::G:  // "Р–РёР·РЅСЊ"
 				Draw_Line(hdc, 7, 1, 7, 6);
 				Draw_Line(hdc, 5, 3, 9, 3);
 				Draw_Line(hdc, 4, 1, 5, 3);
@@ -269,36 +269,36 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
 				Draw_Line(hdc, 9, 3, 10, 6);
 				break;
 
-			case ELetter_Type::K:  // "Клей"
+			case ELetter_Type::K:  // "РљР»РµР№"
 				Draw_Line(hdc, 5, 1, 5, 6);
 				Draw_Line(hdc, 5, 5, 9, 1);
 				Draw_Line(hdc, 7, 4, 9, 6);
 				break;
 
-			case ELetter_Type::W:  // "Шире"
+			case ELetter_Type::W:  // "РЁРёСЂРµ"
 				Draw_Line(hdc, 4, 1, 4, 6);
 				Draw_Line_To(hdc, 10, 6);
 				Draw_Line_To(hdc, 10, 1);
 				Draw_Line(hdc, 7, 1, 7, 6);
 				break;
 
-			case ELetter_Type::P:  // "Пол"
+			case ELetter_Type::P:  // "РџРѕР»"
 				Draw_Line(hdc, 5, 6, 5, 1);
 				Draw_Line_To(hdc, 9, 1);
 				Draw_Line_To(hdc, 9, 6);
 				break;
 
-			case ELetter_Type::L:  // "Лазер"
+			case ELetter_Type::L:  // "Р›Р°Р·РµСЂ"
 				Draw_Line(hdc, 5, 6, 7, 1);
 				Draw_Line_To(hdc, 9, 6);
 				break;
 
-			case ELetter_Type::T:  // "Три"
+			case ELetter_Type::T:  // "РўСЂРё"
 				Draw_Line(hdc, 5, 1, 9, 1);
 				Draw_Line(hdc, 7, 1, 7, 6);
 				break;
 
-			case ELetter_Type::Plus:  // Переход на следующий уровень
+			case ELetter_Type::Plus:  // РџРµСЂРµС…РѕРґ РЅР° СЃР»РµРґСѓСЋС‰РёР№ СѓСЂРѕРІРµРЅСЊ
 				Draw_Line(hdc, 7, 1, 7, 5);
 				Draw_Line(hdc, 5, 3, 9, 3);
 				break;

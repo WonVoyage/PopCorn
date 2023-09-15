@@ -1,4 +1,4 @@
-#include "Platform_Laser.h"
+ï»¿#include "Platform_Laser.h"
 
 // AsPlatform_Laser
 //------------------------------------------------------------------------------------------------------------
@@ -75,32 +75,32 @@ bool AsPlatform_Laser::Act(EPlatform_State &next_state, double x_pos)
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Laser::Draw_State(HDC hdc, double x_pos, RECT &platform_rect)
-{// Ðèñóåì ëàçåðíóþ ïëàòôîðìó
+{// Ð Ð¸ÑÑƒÐµÐ¼ Ð»Ð°Ð·ÐµÑ€Ð½ÑƒÑŽ Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ñƒ
 
 	HRGN region;
 
 	region = CreateRectRgnIndirect(&platform_rect);
 	SelectClipRgn(hdc, region);
 
-	// 1. Ëåâîå êðûëî
+	// 1. Ð›ÐµÐ²Ð¾Ðµ ÐºÑ€Ñ‹Ð»Ð¾
 	Draw_Laser_Wing(hdc, x_pos, true);
 
-	// 2. Ïðàâîå êðûëî
+	// 2. ÐŸÑ€Ð°Ð²Ð¾Ðµ ÐºÑ€Ñ‹Ð»Ð¾
 	Draw_Laser_Wing(hdc, x_pos, false);
 
 
-	// 3. Öåíòðàëüíàÿ ÷àñòü
-	// 3.0. Íîðìàëüíàÿ ñðåäíÿÿ ÷àñòü
+	// 3. Ð¦ÐµÐ½Ñ‚Ñ€Ð°Ð»ÑŒÐ½Ð°Ñ Ñ‡Ð°ÑÑ‚ÑŒ
+	// 3.0. ÐÐ¾Ñ€Ð¼Ð°Ð»ÑŒÐ½Ð°Ñ ÑÑ€ÐµÐ´Ð½ÑÑ Ñ‡Ð°ÑÑ‚ÑŒ
 	Draw_Laser_Inner_Part(hdc, x_pos);
 
-	// 3.1. Ëåâàÿ íîãà
+	// 3.1. Ð›ÐµÐ²Ð°Ñ Ð½Ð¾Ð³Ð°
 	Draw_Laser_Leg(hdc, x_pos, true);
 
-	// 3.2. Ïðàâàÿ íîãà
+	// 3.2. ÐŸÑ€Ð°Ð²Ð°Ñ Ð½Ð¾Ð³Ð°
 	Draw_Laser_Leg(hdc, x_pos, false);
 
 
-	// 3.3. Êàáèíà
+	// 3.3. ÐšÐ°Ð±Ð¸Ð½Ð°
 	Draw_Laser_Cabin(hdc, x_pos);
 
 	SelectClipRgn(hdc, 0);
@@ -115,13 +115,13 @@ void AsPlatform_Laser::Reset()
 void AsPlatform_Laser::Fire(bool fire_on)
 {
 	if (Platform_State->Laser != EPlatform_Transformation::Active)
-		return;  // Èãíîðèðóåì âûñòðåë, ïîêà ïëàòôîðìà íå ñôîðìèðóåòñÿ
+		return;  // Ð˜Ð³Ð½Ð¾Ñ€Ð¸Ñ€ÑƒÐµÐ¼ Ð²Ñ‹ÑÑ‚Ñ€ÐµÐ», Ð¿Ð¾ÐºÐ° Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ð° Ð½Ðµ ÑÑ„Ð¾Ñ€Ð¼Ð¸Ñ€ÑƒÐµÑ‚ÑÑ
 
 	Enable_Laser_Firing = fire_on;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Laser::Draw_Laser_Wing(HDC hdc, double x_pos, bool is_left)
-{// Ðèñóåì êðûëî ëàçåðíîé ïëàòôîðìû
+{// Ð Ð¸ÑÑƒÐµÐ¼ ÐºÑ€Ñ‹Ð»Ð¾ Ð»Ð°Ð·ÐµÑ€Ð½Ð¾Ð¹ Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ñ‹
 
 	double x, y;
 	int x_offset;
@@ -137,14 +137,14 @@ void AsPlatform_Laser::Draw_Laser_Wing(HDC hdc, double x_pos, bool is_left)
 	if (! is_left)
 		x += AsConfig::Platform_Normal_Width - AsConfig::Platform_Circle_Size;
 
-	// 1. Ñàìî êðûëî
+	// 1. Ð¡Ð°Ð¼Ð¾ ÐºÑ€Ñ‹Ð»Ð¾
 	Circle_Color->Select(hdc);
 
 	Draw_Expanding_Figure(hdc, EFigure_Type::Ellipse, x, y, 7, 7, ratio, x, y + 1, 7, 12);
 
-	// 2. Ïåðåìû÷êà
-	// Ïîçèöèÿ: (3 : 6) -> (5 : 2)
-	// Ðàçìåð: 1 x 1 -> 6 x 5
+	// 2. ÐŸÐµÑ€ÐµÐ¼Ñ‹Ñ‡ÐºÐ°
+	// ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ñ: (3 : 6) -> (5 : 2)
+	// Ð Ð°Ð·Ð¼ÐµÑ€: 1 x 1 -> 6 x 5
 	if (is_left)
 		x_offset = 5;
 	else
@@ -153,17 +153,12 @@ void AsPlatform_Laser::Draw_Laser_Wing(HDC hdc, double x_pos, bool is_left)
 	Draw_Expanding_Figure(hdc, EFigure_Type::Rectangle, x + 3, y + 6, 1, 1, ratio, x + x_offset, y + 2, 6, 5);
 
 
-	// 3. Ïóøêà
+	// 3. ÐŸÑƒÑˆÐºÐ°
 	if (Laser_Transformation_Step >= half_max_step)
 	{
 		ratio = (double)(Laser_Transformation_Step - half_max_step) / (double)half_max_step;
 
 		Gun_Color->Select(hdc);
-
-		//if (is_left)
-		//	x = x_pos + 3.0;
-		//else
-		//	x = x_pos + (AsConfig::Platform_Normal_Width - 4);
 
 		x = Get_Gun_Pos(x_pos, is_left);
 
@@ -172,18 +167,18 @@ void AsPlatform_Laser::Draw_Laser_Wing(HDC hdc, double x_pos, bool is_left)
 		MoveToEx(hdc, (int)(x * d_scale + 1.0), (int)(y * d_scale + 3.0 * d_scale + 1.0), 0);
 		LineTo(hdc, (int)(x * d_scale + 1.0), (int)(y * d_scale + height + 1.0) );
 
-		// 4. Õâîñò
+		// 4. Ð¥Ð²Ð¾ÑÑ‚
 		Draw_Expanding_Figure(hdc, EFigure_Type::Ellipse, x + 1, y + 5, 0, 0, ratio, x - 1, y + 5 + 1.0 / d_scale, 3, 6);
 	}
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Laser::Draw_Laser_Inner_Part(HDC hdc, double x)
-{// Ðèñóåì óìåíüøàþùóþñÿ ÷àñòü îáû÷íîé ïëàòôîðìû
+{// Ð Ð¸ÑÑƒÐµÐ¼ ÑƒÐ¼ÐµÐ½ÑŒÑˆÐ°ÑŽÑ‰ÑƒÑŽÑÑ Ñ‡Ð°ÑÑ‚ÑŒ Ð¾Ð±Ñ‹Ñ‡Ð½Ð¾Ð¹ Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ñ‹
 
 	double y;
 	double ratio = (double)Laser_Transformation_Step / (double)Max_Laser_Transformation_Step;
 
-	// Ðàçìåð: 20 x 5 --> 8 x 1
+	// Ð Ð°Ð·Ð¼ÐµÑ€: 20 x 5 --> 8 x 1
 	y = AsConfig::Platform_Y_Pos;
 
 	Inner_Color->Select(hdc);
@@ -191,11 +186,10 @@ void AsPlatform_Laser::Draw_Laser_Inner_Part(HDC hdc, double x)
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Laser::Draw_Laser_Leg(HDC hdc, double x_pos, bool is_left)
-{// Ðèñóåì "íîãó" ëàçåðíîé ïëàòôîðìû
+{// Ð Ð¸ÑÑƒÐµÐ¼ "Ð½Ð¾Ð³Ñƒ" Ð»Ð°Ð·ÐµÑ€Ð½Ð¾Ð¹ Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ñ‹
 
 	double x, y;
 	double x_scale;
-	//const int scale = AsConfig::Global_Scale;
 	const double d_scale = AsConfig::D_Global_Scale;
 	double ratio = (double)Laser_Transformation_Step / (double)Max_Laser_Transformation_Step;
 
@@ -226,7 +220,7 @@ void AsPlatform_Laser::Draw_Laser_Leg(HDC hdc, double x_pos, bool is_left)
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform_Laser::Draw_Laser_Cabin(HDC hdc, double x)
-{// Ðèñóåì êàáèíó ëàçåðíîé ïëàòôîðìû
+{// Ð Ð¸ÑÑƒÐµÐ¼ ÐºÐ°Ð±Ð¸Ð½Ñƒ Ð»Ð°Ð·ÐµÑ€Ð½Ð¾Ð¹ Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ñ‹
 
 	double y;
 	const int scale = AsConfig::Global_Scale;
@@ -235,19 +229,19 @@ void AsPlatform_Laser::Draw_Laser_Cabin(HDC hdc, double x)
 
 	y = AsConfig::Platform_Y_Pos;
 
-	// 1. Âíåøíÿÿ ÷àñòü
-	// Ðàçìåð: 2 x 1 --> 10 x 8
+	// 1. Ð’Ð½ÐµÑˆÐ½ÑÑ Ñ‡Ð°ÑÑ‚ÑŒ
+	// Ð Ð°Ð·Ð¼ÐµÑ€: 2 x 1 --> 10 x 8
 	Inner_Color->Select(hdc);
 	Draw_Expanding_Figure(hdc, EFigure_Type::Ellipse, x + 13, y + 1, 2, 1, ratio, x + 9, y - 1, 10, 8 - one_pixel);
 
-	// 2. Ñðåäíåå êîëüöî
-	// Ðàçìåð: 2 x 1 --> 8 x 6
+	// 2. Ð¡Ñ€ÐµÐ´Ð½ÐµÐµ ÐºÐ¾Ð»ÑŒÑ†Ð¾
+	// Ð Ð°Ð·Ð¼ÐµÑ€: 2 x 1 --> 8 x 6
 	AsConfig::BG_Color.Select(hdc);
 	Draw_Expanding_Figure(hdc, EFigure_Type::Rectangle, x + 13, y + 1, 2, 1, ratio, x + 11, y, 6, 1);
 	Draw_Expanding_Figure(hdc, EFigure_Type::Ellipse, x + 13, y + 1, 2, 1, ratio, x + 10, y, 8, 5 - one_pixel);
 
-	// 3. Âíóòðåííÿÿ ÷àñòü
-	// Ðàçìåð: 2 x 1 --> 6 x 4
+	// 3. Ð’Ð½ÑƒÑ‚Ñ€ÐµÐ½Ð½ÑÑ Ñ‡Ð°ÑÑ‚ÑŒ
+	// Ð Ð°Ð·Ð¼ÐµÑ€: 2 x 1 --> 6 x 4
 	AsConfig::White_Color.Select(hdc);
 	Draw_Expanding_Figure(hdc, EFigure_Type::Ellipse, x + 13, y + 1, 2, 1, ratio, x + 11, y, 6, 4 - one_pixel);
 }

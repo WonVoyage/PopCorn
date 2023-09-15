@@ -1,10 +1,10 @@
-#include "Gate.h"
+п»ї#include "Gate.h"
 
 // AGate
 const double AGate::Max_Gap_Short_Height = 9.0;
-const double AGate::Gap_Height_Short_Step = Max_Gap_Short_Height / ( (double)AsConfig::FPS / 2.0);  // Для анимации за 1/2 секунды
+const double AGate::Gap_Height_Short_Step = Max_Gap_Short_Height / ( (double)AsConfig::FPS / 2.0);  // Р”Р»СЏ Р°РЅРёРјР°С†РёРё Р·Р° 1/2 СЃРµРєСѓРЅРґС‹
 const double AGate::Max_Gap_Long_Height = 18.0;
-const double AGate::Gap_Height_Long_Step = Max_Gap_Long_Height / ( (double)AsConfig::FPS * 1.5);  // Для анимации за 1.5 секунды
+const double AGate::Gap_Height_Long_Step = Max_Gap_Long_Height / ( (double)AsConfig::FPS * 1.5);  // Р”Р»СЏ Р°РЅРёРјР°С†РёРё Р·Р° 1.5 СЃРµРєСѓРЅРґС‹
 //------------------------------------------------------------------------------------------------------------
 AGate::AGate(int x_pos, int y_pos, int level_x_pos, int level_y_pos)
 : Gate_State(EGate_State::Closed), Gate_Transformation(EGate_Transformation::Unknown), X_Pos(x_pos), Y_Pos(y_pos),
@@ -76,12 +76,12 @@ void AGate::Draw(HDC hdc, RECT &paint_area)
 
 	if (Gate_State == EGate_State::Long_Open
 		&& (Gate_Transformation == EGate_Transformation::Init || Gate_Transformation == EGate_Transformation::Finalize) )
-		Draw_Charge(hdc);  // Рисуем "разряд" между чашами
+		Draw_Charge(hdc);  // Р РёСЃСѓРµРј "СЂР°Р·СЂСЏРґ" РјРµР¶РґСѓ С‡Р°С€Р°РјРё
 }
 //------------------------------------------------------------------------------------------------------------
 bool AGate::Is_Finished()
 {
-	return false;  //!!! Надо сделать!
+	return false;  // Р—Р°РіР»СѓС€РєР°, РїРѕРєР° РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
 }
 //------------------------------------------------------------------------------------------------------------
 void AGate::Open_Gate(bool short_open)
@@ -238,17 +238,17 @@ void AGate::Draw_Cup(HDC hdc, bool top_cup)
 	GetWorldTransform(hdc, &old_xform);
 	SetWorldTransform(hdc, &xform);
 
-	// 1. Полукруглая часть чаши
+	// 1. РџРѕР»СѓРєСЂСѓРіР»Р°СЏ С‡Р°СЃС‚СЊ С‡Р°С€Рё
 	rect.left = x * scale;
 	rect.top = (y + 1) * scale;
 	rect.right = rect.left + 6 * scale;
 	rect.bottom = rect.top + 4 * scale;
 
-	// 1.1. Основа
+	// 1.1. РћСЃРЅРѕРІР°
 	AsConfig::Blue_Color.Select(hdc);
 	AsTools::Round_Rect(hdc, rect, 3);
 
-	// 1.2. Блик слева
+	// 1.2. Р‘Р»РёРє СЃР»РµРІР°
 	rect.left = X_Pos * scale;
 	rect.right = rect.left + 3 * scale;
 
@@ -278,10 +278,10 @@ void AGate::Draw_Cup(HDC hdc, bool top_cup)
 	SelectClipRgn(hdc, 0);
 	DeleteObject(region);
 
-	AsTools::Rect(hdc, x, y + 4, 4, 1, AsConfig::White_Color);  // Блик снизу
-	AsTools::Rect(hdc, x + 4, y + 3, 2, 2, AsConfig::Blue_Color);  // "Заплатка" в правом нижнем углу
-	AsTools::Rect(hdc, x + 4, y + 3, 1, 1, AsConfig::BG_Color);  // Фоновая перфорация
-	AsTools::Rect(hdc, x + 2, y, 2, 1, AsConfig::Blue_Color);  // Перемычка перед чашей
+	AsTools::Rect(hdc, x, y + 4, 4, 1, AsConfig::White_Color);  // Р‘Р»РёРє СЃРЅРёР·Сѓ
+	AsTools::Rect(hdc, x + 4, y + 3, 2, 2, AsConfig::Blue_Color);  // "Р—Р°РїР»Р°С‚РєР°" РІ РїСЂР°РІРѕРј РЅРёР¶РЅРµРј СѓРіР»Сѓ
+	AsTools::Rect(hdc, x + 4, y + 3, 1, 1, AsConfig::BG_Color);  // Р¤РѕРЅРѕРІР°СЏ РїРµСЂС„РѕСЂР°С†РёСЏ
+	AsTools::Rect(hdc, x + 2, y, 2, 1, AsConfig::Blue_Color);  // РџРµСЂРµРјС‹С‡РєР° РїРµСЂРµРґ С‡Р°С€РµР№
 
 	Draw_Edges(hdc);
 
@@ -352,13 +352,13 @@ void AGate::Draw_Long_Opening_Edges(HDC hdc)
 void AGate::Draw_One_Edge(HDC hdc, int edge_y_offset, bool long_edge)
 {
 	if (long_edge)
-	{// Длинное ребро
+	{// Р”Р»РёРЅРЅРѕРµ СЂРµР±СЂРѕ
 
 		AsTools::Rect(hdc, 0, edge_y_offset, 4, 1, AsConfig::White_Color);
 		AsTools::Rect(hdc, 4, edge_y_offset, 2, 1, AsConfig::Blue_Color);
 	}
 	else
-	{// Короткое ребро
+	{// РљРѕСЂРѕС‚РєРѕРµ СЂРµР±СЂРѕ
 
 		AsTools::Rect(hdc, 1, edge_y_offset, 2, 1, AsConfig::Blue_Color);
 		AsTools::Rect(hdc, 4, edge_y_offset, 1, 1, AsConfig::Blue_Color);
@@ -368,7 +368,7 @@ void AGate::Draw_One_Edge(HDC hdc, int edge_y_offset, bool long_edge)
 void AGate::Draw_Red_Edge(HDC hdc, int edge_y_offset, bool long_edge, bool has_highlight)
 {
 	if (long_edge)
-	{// Длинное ребро
+	{// Р”Р»РёРЅРЅРѕРµ СЂРµР±СЂРѕ
 
 		AsTools::Rect(hdc, 0, edge_y_offset, 6, 1, AsConfig::Red_Color);
 
@@ -376,7 +376,7 @@ void AGate::Draw_Red_Edge(HDC hdc, int edge_y_offset, bool long_edge, bool has_h
 			AsTools::Rect(hdc, 1, edge_y_offset, 1, 1, AsConfig::White_Color);
 	}
 	else
-	{// Короткое ребро
+	{// РљРѕСЂРѕС‚РєРѕРµ СЂРµР±СЂРѕ
 
 		AsTools::Rect(hdc, 1, edge_y_offset, 4, 1, AsConfig::Red_Color);
 	}
@@ -390,7 +390,7 @@ void AGate::Draw_Charge(HDC hdc)
 	double ratio = Gap_Height / Max_Gap_Long_Height;
 
 	if (ratio < 0.2 || ratio > 0.9)
-		return;  // Не рисуем разряд в начале и конце анимации
+		return;  // РќРµ СЂРёСЃСѓРµРј СЂР°Р·СЂСЏРґ РІ РЅР°С‡Р°Р»Рµ Рё РєРѕРЅС†Рµ Р°РЅРёРјР°С†РёРё
 
 	field_y = (int)(Origin_Y_Pos + (double)Height / 2.0 - Gap_Height / 2.0) + 1;
 
