@@ -4,6 +4,8 @@
 #include "Info_Panel.h"
 #include "Level_Data.h"
 #include "Mop.h"
+#include "Level_Title.h"
+#include "Game_Title.h"
 
 //------------------------------------------------------------------------------------------------------------
 class APoint
@@ -13,93 +15,6 @@ public:
 	APoint(int x, int y);
 
 	int X, Y;
-};
-//------------------------------------------------------------------------------------------------------------
-enum class ELevel_Title_State: unsigned char
-{
-	Missing,
-	Showing,
-	Hiding
-};
-//------------------------------------------------------------------------------------------------------------
-class AsLevel_Title: public AGraphics_Object
-{
-public:
-	AsLevel_Title();
-
-	virtual void Act();
-	virtual void Clear(HDC hdc, RECT &paint_area);
-	virtual void Draw(HDC hdc, RECT &paint_area);
-	virtual bool Is_Finished();
-
-	void Show(int level_number);
-	void Hide();
-
-private:
-	//bool Is_Visible;
-	ELevel_Title_State Level_Title_State;
-	RECT Title_Rect;
-	ALabel Level_Name, Level_Number;
-
-	static const int Width = 96;
-	static const int Height = 14;
-	static const int X_Pos = AsConfig::Max_X_Pos / 2 - Width / 2;
-	static const int Y_Pos = 150;
-};
-//------------------------------------------------------------------------------------------------------------
-class AFinal_Letter: public AGraphics_Object
-{
-public:
-	AFinal_Letter(double x_pos, double y_pos, const wchar_t letter);
-
-	virtual void Act();
-	virtual void Clear(HDC hdc, RECT &paint_area);
-	virtual void Draw(HDC hdc, RECT &paint_area);
-	virtual bool Is_Finished();
-
-	double X_Pos, Y_Pos;
-
-private:
-	wchar_t Letter;
-};
-//------------------------------------------------------------------------------------------------------------
-enum class EGame_Title_State: unsigned char
-{
-	Idle,
-
-	Game_Over_Descent,
-	Game_Over_Destroy,
-
-	Game_Won_Descent,
-	Game_Won_Animate,
-
-	Finished
-};
-//------------------------------------------------------------------------------------------------------------
-class AsGame_Title: public AGraphics_Object
-{
-public:
-	~AsGame_Title();
-	AsGame_Title();
-
-	virtual void Act();
-	virtual void Clear(HDC hdc, RECT &paint_area);
-	virtual void Draw(HDC hdc, RECT &paint_area);
-	virtual bool Is_Finished();
-
-	void Show(bool game_over);
-	bool Is_Visible();
-
-private:
-	EGame_Title_State Game_Title_State;
-	int Start_Tick;
-	RECT Title_Rect, Prev_Title_Rect;
-
-	std::vector<AFinal_Letter *> Title_Letters;
-
-	static const int Descent_Timeout = AsConfig::FPS * 6;  // Спускается за 6 секунд
-	static const int Height = 32;
-	static const double Low_Y_Pos;
 };
 //------------------------------------------------------------------------------------------------------------
 class AsLevel: public AHit_Checker, public AGame_Object

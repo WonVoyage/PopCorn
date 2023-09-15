@@ -91,9 +91,6 @@
     <Filter Include="#Screen\Info_Panel">
       <UniqueIdentifier>{95e624d1-08ee-4cd6-aee4-9b91fefaf4ae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="#Screen\Level">
-      <UniqueIdentifier>{af0f142b-c080-4e29-8c92-82778d40dffd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="#Screen\Falling_Letter">
       <UniqueIdentifier>{a2e8c539-06c0-49e2-a677-d119a7607206}</UniqueIdentifier>
     </Filter>
@@ -102,9 +99,6 @@
     </Filter>
     <Filter Include="#Screen\Indicator">
       <UniqueIdentifier>{593db298-3e56-4926-b37d-3e385a354963}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="#Screen\Level_Data">
-      <UniqueIdentifier>{a48ae110-d05f-4765-a32f-2df41535c8ac}</UniqueIdentifier>
     </Filter>
     <Filter Include="#Mop">
       <UniqueIdentifier>{e5a1813b-9385-41b1-bfae-8fc027d540ad}</UniqueIdentifier>
@@ -117,6 +111,30 @@
     </Filter>
     <Filter Include="#Mop\Mop_Cylinder">
       <UniqueIdentifier>{7e3d6101-1e88-44cd-bb8f-67b6a04365a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="#Monsters\Explosion">
+      <UniqueIdentifier>{ba8bae26-e2f9-4e1a-bff6-eafebef583a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="#Screen\Label">
+      <UniqueIdentifier>{1370415a-2e85-4066-8d4e-6b26003936fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="#Screen\Final_Letter">
+      <UniqueIdentifier>{ce8c32b6-cfb1-4c7c-83f0-76c4c17c3a1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="#Screen\Game_Title">
+      <UniqueIdentifier>{958e6fdd-f43c-4452-b6dd-c68ba1954a73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="#Level">
+      <UniqueIdentifier>{00cf506f-c510-47e3-baf7-0b865bcb6cee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="#Level\Level">
+      <UniqueIdentifier>{af0f142b-c080-4e29-8c92-82778d40dffd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="#Level\Level_Data">
+      <UniqueIdentifier>{a48ae110-d05f-4765-a32f-2df41535c8ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="#Level\Level_Title">
+      <UniqueIdentifier>{798510a3-0cb7-48a3-92e3-13750663b75c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -139,7 +157,7 @@
       <Filter>#Border\Border</Filter>
     </ClInclude>
     <ClInclude Include="Level.h">
-      <Filter>#Screen\Level</Filter>
+      <Filter>#Level\Level</Filter>
     </ClInclude>
     <ClInclude Include="Config.h">
       <Filter>#Tools\Config</Filter>
@@ -199,7 +217,7 @@
       <Filter>#Screen\Indicator</Filter>
     </ClInclude>
     <ClInclude Include="Level_Data.h">
-      <Filter>#Screen\Level_Data</Filter>
+      <Filter>#Level\Level_Data</Filter>
     </ClInclude>
     <ClInclude Include="Mop.h">
       <Filter>#Mop\Mop</Filter>
@@ -209,6 +227,21 @@
     </ClInclude>
     <ClInclude Include="Mop_Cylinder.h">
       <Filter>#Mop\Mop_Cylinder</Filter>
+    </ClInclude>
+    <ClInclude Include="Explosion.h">
+      <Filter>#Monsters\Explosion</Filter>
+    </ClInclude>
+    <ClInclude Include="Level_Title.h">
+      <Filter>#Level\Level_Title</Filter>
+    </ClInclude>
+    <ClInclude Include="Label.h">
+      <Filter>#Screen\Label</Filter>
+    </ClInclude>
+    <ClInclude Include="Final_Letter.h">
+      <Filter>#Screen\Final_Letter</Filter>
+    </ClInclude>
+    <ClInclude Include="Game_Title.h">
+      <Filter>#Screen\Game_Title</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -235,7 +268,7 @@
       <Filter>#Border\Border</Filter>
     </ClCompile>
     <ClCompile Include="Level.cpp">
-      <Filter>#Screen\Level</Filter>
+      <Filter>#Level\Level</Filter>
     </ClCompile>
     <ClCompile Include="Config.cpp">
       <Filter>#Tools\Config</Filter>
@@ -295,7 +328,7 @@
       <Filter>#Screen\Indicator</Filter>
     </ClCompile>
     <ClCompile Include="Level_Data.cpp">
-      <Filter>#Screen\Level_Data</Filter>
+      <Filter>#Level\Level_Data</Filter>
     </ClCompile>
     <ClCompile Include="Mop.cpp">
       <Filter>#Mop\Mop</Filter>
@@ -305,6 +338,21 @@
     </ClCompile>
     <ClCompile Include="Mop_Cylinder.cpp">
       <Filter>#Mop\Mop_Cylinder</Filter>
+    </ClCompile>
+    <ClCompile Include="Explosion.cpp">
+      <Filter>#Monsters\Explosion</Filter>
+    </ClCompile>
+    <ClCompile Include="Level_Title.cpp">
+      <Filter>#Level\Level_Title</Filter>
+    </ClCompile>
+    <ClCompile Include="Label.cpp">
+      <Filter>#Screen\Label</Filter>
+    </ClCompile>
+    <ClCompile Include="Final_Letter.cpp">
+      <Filter>#Screen\Final_Letter</Filter>
+    </ClCompile>
+    <ClCompile Include="Game_Title.cpp">
+      <Filter>#Screen\Game_Title</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

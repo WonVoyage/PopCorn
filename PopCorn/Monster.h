@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Explosive_Ball.h"
+#include "Explosion.h"
 #include "Gate.h"
 #include "Level.h"
 
@@ -21,7 +21,7 @@ enum class EMonster_State: unsigned char
 	Destroing
 };
 //------------------------------------------------------------------------------------------------------------
-class AMonster: public AHit_Checker, public AGame_Object
+class AMonster: public AHit_Checker, public AGame_Object, public AExplosion
 {
 public:
 	virtual ~AMonster();
@@ -62,16 +62,12 @@ protected:
 	RECT Monster_Rect, Prev_Monster_Rect;
 
 private:
-	void Draw_Destroing(HDC hdc, RECT &paint_area);
 	void Act_Destroing();
 	void Get_Monster_Rect(double x_pos, double y_pos, RECT &rect);
 	void Redraw_Monster();
 	void Change_Direction();
 
 	double Speed, Prev_Speed;
-	std::vector<AExplosive_Ball> Explosive_Balls;
-
-	static const int Explosive_Balls_Count = 20;
 };
 //------------------------------------------------------------------------------------------------------------
 class AMonster_Eye: public AMonster

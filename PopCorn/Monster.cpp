@@ -8,7 +8,7 @@ AMonster::~AMonster()
 //------------------------------------------------------------------------------------------------------------
 AMonster::AMonster()
 : Monster_State(EMonster_State::Missing), Need_To_Freeze(false), X_Pos(0), Y_Pos(0), Speed(0.0), Prev_Speed(0.0), Direction(0.0),
-  Next_Direction_Switch_Tick(0), Alive_Timer_Tick(0), Monster_Rect{}, Explosive_Balls(Explosive_Balls_Count)
+  Next_Direction_Switch_Tick(0), Alive_Timer_Tick(0), Monster_Rect{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -202,7 +202,7 @@ void AMonster::Draw(HDC hdc, RECT &paint_area)
 		break;
 
 	case EMonster_State::Destroing:
-		Draw_Destroing(hdc, paint_area);
+		Draw_Explosion(hdc, paint_area);
 		break;
 
 	default:
@@ -245,47 +245,10 @@ void AMonster::Activate(double x_pos, double y_pos, bool moving_right)
 //------------------------------------------------------------------------------------------------------------
 void AMonster::Destroy()
 {
-	int half_width, half_height;
-	int x_pos, y_pos;
-	int x_offset, y_offset;
-	int size, half_size, rest_size;
-	int time_offset;
-	bool is_red;
-
 	if (! (Monster_State == EMonster_State::Emitting || Monster_State == EMonster_State::Alive) )
 		return;
 
-	half_width = Width * AsConfig::Global_Scale / 2;
-	half_height = Height * AsConfig::Global_Scale / 2;
-	x_pos = (int)(X_Pos * AsConfig::D_Global_Scale) + half_width;
-	y_pos = (int)(Y_Pos * AsConfig::D_Global_Scale) + half_height;
-
-	half_size = half_width;
-
-	if (half_height < half_size)
-		half_size = half_height;
-
-	for (auto &ball : Explosive_Balls)
-	{
-		x_offset = AsTools::Rand(half_width) - half_width / 2;
-		y_offset = AsTools::Rand(half_height) - half_height / 2;
-
-		rest_size = half_size - (int)sqrt(x_offset * x_offset + y_offset * y_offset);
-
-		size = AsTools::Rand(rest_size / 2) + rest_size / 2;
-
-		if (size < AsConfig::Global_Scale)
-			size = AsConfig::Global_Scale;
-
-		time_offset = AsTools::Rand(AsConfig::FPS * 3 / 2);
-
-		if (AsTools::Rand(2) == 0)
-			is_red = true;
-		else
-			is_red = false;
-
-		ball.Explode(x_pos + x_offset, y_pos + y_offset, size * 2, is_red, time_offset, 10);
-	}
+	Start_Explosion(Monster_Rect);
 
 	Monster_State = EMonster_State::Destroing;
 
@@ -300,24 +263,9 @@ void AMonster::Set_Freeze_State(bool freeze)
 	Need_To_Freeze = freeze;
 }
 //------------------------------------------------------------------------------------------------------------
-void AMonster::Draw_Destroing(HDC hdc, RECT &paint_area)
-{
-	for (auto &ball : Explosive_Balls)
-		ball.Draw(hdc, paint_area);
-}
-//------------------------------------------------------------------------------------------------------------
 void AMonster::Act_Destroing()
 {
-	bool destroing_is_finished = true;
-
-	for (auto &ball : Explosive_Balls)
-	{
-		ball.Act();
-
-		destroing_is_finished &= ball.Is_Finished();
-	}
-
-	if (destroing_is_finished)
+	if (Act_On_Explosion() )
 		Monster_State = EMonster_State::Missing;
 }
 //------------------------------------------------------------------------------------------------------------
