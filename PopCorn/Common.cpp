@@ -113,12 +113,13 @@ AString::AString(const wchar_t *str)
 {
 }
 //------------------------------------------------------------------------------------------------------------
-void AString::Append(int value)
+void AString::Append(int value, int digits)
 {
+	wchar_t format[32];
 	wchar_t buf[32];
 
-	//_itow_s(value, buf, 32, 10);
-	swprintf(buf, 32, L"%.6i", value);
+	swprintf(format, 32, L"%%.%ii", digits);
+	swprintf(buf, 32, format, value);
 
 	Content += buf;
 }
@@ -131,6 +132,11 @@ const wchar_t *AString::Get_Content()
 int AString::Get_Length()
 {
 	return Content.length();
+}
+//------------------------------------------------------------------------------------------------------------
+void AString::Clear()
+{
+	Content = L"";
 }
 //------------------------------------------------------------------------------------------------------------
 

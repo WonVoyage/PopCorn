@@ -85,9 +85,10 @@ public:
 	AString();
 	AString(const wchar_t *str);
 
-	void Append(int value);
+	void Append(int value, int digits);
 	const wchar_t *Get_Content();
 	int Get_Length();
+	void Clear();
 
 private:
 	std::wstring Content;

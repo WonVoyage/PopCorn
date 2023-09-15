@@ -75,9 +75,9 @@ void AIndicator::Cancel()
 		AsMessage_Manager::Add_Message(message);
 
 		Need_To_Notify = false;
-	}
 
-	Reset();
+		Reset();
+	}
 }
 //------------------------------------------------------------------------------------------------------------
 void AIndicator::Restart()

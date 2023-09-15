@@ -11,10 +11,26 @@ enum class EScore_Event_Type: unsigned char
 	Catch_Letter
 };
 //------------------------------------------------------------------------------------------------------------
+class ALabel
+{
+public:
+	ALabel(int x_pos, int y_pos, int width, int height, const AFont &font, const AColor &color);
+
+	void Draw(HDC hdc);
+
+	RECT Content_Rect;
+	AString Content;
+
+private:
+	int X_Pos, Y_Pos;
+	int Width, Height;
+	const AFont &Font;
+	const AColor &Color;
+};
+//------------------------------------------------------------------------------------------------------------
 class AsInfo_Panel: public AGame_Object
 {
 public:
-	~AsInfo_Panel();
 	AsInfo_Panel();
 
 	virtual void Begin_Movement();
@@ -39,15 +55,16 @@ private:
 	void Choose_Font();
 	void Show_Extra_Lives(HDC hdc);
 	void Draw_Extra_Life(HDC hdc, int x_pos, int y_pos);
-	void Draw_String(HDC hdc, RECT &rect, AString &str, bool draw_name);
+	//void Draw_String(HDC hdc, RECT &rect, AString &str, bool draw_name);
 
 	int Extra_Lives_Count;
-	HFONT Logo_Pop_Font, Logo_Corn_Font, Name_Font, Score_Font;
-	AColor *Dark_Blue, *Dark_Red;
+	//HFONT Logo_Pop_Font, Logo_Corn_Font;
+	AColor Dark_Blue, Dark_Red;
 
 	AFalling_Letter Letter_P, Letter_G, Letter_M;
 
-	AString Player_Name;
+	//AString Player_Name;
+	ALabel Player_Name_Label, Score_Label;
 
 	static RECT Logo_Rect;  // Область логотипа
 	static RECT Data_Rect;  // Область данных (имени игрока, счёта и индикаторов)

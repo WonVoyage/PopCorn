@@ -134,9 +134,42 @@ AColor *AColor_Fade::Get_Color(int fade_step)
 
 
 
+// AFont
+//------------------------------------------------------------------------------------------------------------
+AFont::~AFont()
+{
+	if (Font_Handle != 0)
+		DeleteObject(Font_Handle);
+}
+//------------------------------------------------------------------------------------------------------------
+AFont::AFont(int height, int weight, int family, const wchar_t *face_name)
+{
+	LOGFONT log_font{};
+
+	log_font.lfHeight = height;
+	log_font.lfWeight = weight;
+	log_font.lfOutPrecision = 3;
+	log_font.lfClipPrecision = 2;
+	log_font.lfQuality = 1;
+	log_font.lfPitchAndFamily = family;
+	wcscpy_s(log_font.lfFaceName, face_name);
+
+	Font_Handle = CreateFontIndirect(&log_font);
+}
+//------------------------------------------------------------------------------------------------------------
+void AFont::Select(HDC hdc) const
+{
+	SelectObject(hdc, Font_Handle);
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
 // AsConfig
 bool AsConfig::Level_Has_Floor = false;
 int AsConfig::Current_Timer_Tick = 0;
+HWND AsConfig::Hwnd;
 
 const AColor AsConfig::BG_Color(15, 63, 31);
 const AColor AsConfig::Red_Color(255, 85, 85);
@@ -160,7 +193,10 @@ const AColor AsConfig::Explosion_Blue_Color(White_Color, Blue_Color, 0);
 const AColor AsConfig::Shadow_Color(BG_Color, Global_Scale);
 const AColor AsConfig::Highlight_Color(White_Color, Global_Scale);
 
-HWND AsConfig::Hwnd;
+const AFont AsConfig::Name_Font(-48, 700, 49, L"Consolas");
+const AFont AsConfig::Score_Font(-44, 700, 49, L"Consolas");
+const AFont AsConfig::Logo_Pop_Font(-128, 900, 34, L"Arial Black");
+const AFont AsConfig::Logo_Corn_Font(-96, 900, 34, L"Arial Black");
 
 const double AsConfig::D_Global_Scale = (double)Global_Scale;
 const double AsConfig::Moving_Step_Size = 1.0 / Global_Scale;
