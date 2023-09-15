@@ -66,7 +66,7 @@ int AsBorder::Long_Open_Gate()
 	//else
 	//	gate_index = 1;
 
-	//gate_index = 1;
+	gate_index = 3;
 
 	for (i = 0; i < (int)Gates.size(); i++)
 	{

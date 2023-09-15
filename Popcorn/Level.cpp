@@ -44,7 +44,10 @@ bool AsLevel::Check_Hit(double next_x_pos, double next_y_pos, ABall_Object *ball
 	bool got_horizontal_hit, got_vertical_hit;
 	double horizontal_reflection_pos, vertical_reflection_pos;
 
-	if (next_y_pos + AsConfig::Ball_Radius > AsConfig::Level_Y_Offset + (AsConfig::Level_Height - 1) * AsConfig::Cell_Height + AsConfig::Brick_Height)
+	if (ball->Get_State() == EBall_State::On_Parachute)
+		return false;
+
+	if (next_y_pos - AsConfig::Ball_Radius > AsConfig::Level_Y_Offset + (AsConfig::Level_Height - 1) * AsConfig::Cell_Height + AsConfig::Brick_Height)
 		return false;
 
 	direction = ball->Get_Direction();
@@ -240,6 +243,12 @@ void AsLevel::Init()
 	{
 		level_data = new ALevel_Data(i + 1);
 		Levels_Data.push_back(level_data);
+
+		if (i == 7)
+			level_data->Advertisement = new AAdvertisement(4, 7, 2, 3);
+
+		if (i == 9)
+			level_data->Advertisement = new AAdvertisement(1, 9, 2, 3);
 	}
 }
 //------------------------------------------------------------------------------------------------------------
@@ -255,6 +264,8 @@ void AsLevel::Set_Current_Level(int level_number)
 	level_data = Levels_Data[level_number - 1];
 
 	memcpy(Current_Level, level_data->Level, sizeof(Current_Level) );
+
+	Advertisement = level_data->Advertisement;
 
 	// 1. Считаем телепорты
 	Teleport_Bricks_Pos.erase(Teleport_Bricks_Pos.begin(), Teleport_Bricks_Pos.end() );
@@ -272,8 +283,6 @@ void AsLevel::Set_Current_Level(int level_number)
 
 	if (Teleport_Bricks_Pos.size() == 1)
 		AsConfig::Throw();  // Телепортов должно быть 0 либо больше 1!
-
-	Advertisement = new AAdvertisement(9, 6, 2, 3);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsLevel::Get_Next_Falling_Letter(int &index, AFalling_Letter **falling_letter)
@@ -319,26 +328,16 @@ bool AsLevel::Has_Brick_At(RECT &monster_rect)
 	int y_step = AsConfig::Cell_Height * AsConfig::Global_Scale;
 	int min_level_x, max_level_x;
 	int min_level_y, max_level_y;
-	int min_cell_x, min_cell_y;
+	int max_cell_x, max_cell_y;
+
+	if (monster_rect.top > level_y_offs + ( (AsConfig::Level_Height - 1) * AsConfig::Cell_Height + AsConfig::Brick_Height) * AsConfig::Global_Scale)
+		return false;
 
 	min_level_x = (monster_rect.left - level_x_offs) / x_step;
 	max_level_x = (monster_rect.right - level_x_offs) / x_step;
 
 	min_level_y = (monster_rect.top - level_y_offs) / y_step;
 	max_level_y = (monster_rect.bottom - level_y_offs) / y_step;
-
-	// Т.к. ячейка уровня больше кипича (хотя и начинается в одинаковых с кирпичом координатах),
-	// то она имеет правую и нижнюю пустую полосу, в которой может находиться монстр.
-	// Игнорируем ряд (или столбец) кирпичей, если монстр попал в ячейку но не попал в кирпич.
-
-	min_cell_x = min_level_x * y_step + level_x_offs;
-	min_cell_y = min_level_y * y_step + level_y_offs;
-
-	if (monster_rect.left - min_cell_x > AsConfig::Brick_Width * AsConfig::Global_Scale)
-		++min_level_x;
-
-	if (monster_rect.top - min_cell_y > AsConfig::Brick_Height * AsConfig::Global_Scale)
-		++min_level_y;
 
 	if (min_level_x >= AsConfig::Level_Width)
 		min_level_x = AsConfig::Level_Width - 1;
@@ -351,6 +350,21 @@ bool AsLevel::Has_Brick_At(RECT &monster_rect)
 
 	if (max_level_y >= AsConfig::Level_Height)
 		max_level_y = AsConfig::Level_Height - 1;
+
+	// Т.к. ячейка уровня больше кипича (хотя и начинается в одинаковых с кирпичом координатах),
+	// то она имеет правую и нижнюю пустую полосу, в которой может находиться монстр.
+	// Игнорируем ряд (или столбец) кирпичей, если монстр попал в ячейку но не попал в кирпич.
+
+	max_cell_x = max_level_x * y_step + level_x_offs;
+	max_cell_y = max_level_y * y_step + level_y_offs;
+
+	if (monster_rect.left > max_cell_x + AsConfig::Brick_Width * AsConfig::Global_Scale
+		&& monster_rect.left < max_cell_x + x_step)
+		--max_level_x;
+
+	if (monster_rect.top > max_cell_y + AsConfig::Brick_Height * AsConfig::Global_Scale
+		&& monster_rect.top < max_cell_y + y_step)
+		--max_level_y;
 
 	for (i = min_level_y; i <= max_level_y; i++)
 		for (j = min_level_x; j <= max_level_x; j++)
@@ -377,6 +391,7 @@ bool AsLevel::On_Hit(int brick_x, int brick_y, ABall_Object *ball, bool vertical
 	{
 		ball->Set_On_Parachute(brick_x, brick_y);
 		Current_Level[brick_y][brick_x] = (char)EBrick_Type::None;
+		can_reflect = false;
 	}
 	else if (Add_Falling_Letter(brick_x, brick_y, brick_type) )
 		Current_Level[brick_y][brick_x] = (char)EBrick_Type::None;
@@ -630,7 +645,8 @@ bool AsLevel::Check_Vertical_Hit(double next_x_pos, double next_y_pos, int level
 		if (Hit_Circle_On_Line(next_y_pos - Current_Brick_Low_Y, next_x_pos, Current_Brick_Left_X, Current_Brick_Right_X, AsConfig::Ball_Radius, reflection_pos) )
 		{
 			// Проверяем возможность отскока вниз
-			if (level_y < AsConfig::Level_Height - 1 && Current_Level[level_y + 1][level_x] == 0)
+			if (level_y == AsConfig::Level_Height - 1 ||
+				(level_y < AsConfig::Level_Height - 1 && Current_Level[level_y + 1][level_x] == 0) )
 				return true;
 			else
 				return false;
