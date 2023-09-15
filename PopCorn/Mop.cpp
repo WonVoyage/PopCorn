@@ -16,7 +16,7 @@ AsMop::~AsMop()
 }
 //------------------------------------------------------------------------------------------------------------
 AsMop::AsMop()
-: Mop_State(EMop_State::Idle), Y_Pos(0), Max_Y_Pos(0), Lifting_Height(0), Start_Tick(0)
+: Mop_State(EMop_State::Idle), Mopping_Is_Done(false), Y_Pos(0), Max_Y_Pos(0), Lifting_Height(0), Start_Tick(0)
 {
 	int i;
 	int x_pos, y_pos;
@@ -93,7 +93,7 @@ void AsMop::Act()
 	int time_offset;
 	double ratio;
 
-	if (Mop_State == EMop_State::Idle || Mop_State == EMop_State::Clean_Done || Mop_State == EMop_State::Descend_Done)
+	if (Mop_State == EMop_State::Idle || Mop_State == EMop_State::Clean_Done)
 		return;
 
 	Prev_Mop_Rect = Mop_Rect;
@@ -124,6 +124,12 @@ void AsMop::Act()
 
 	case EMop_State::Descending:
 		Act_Lifting(false);  // Опускаем сложенную швабру
+		break;
+
+
+	case EMop_State::Descend_Done:
+		Mop_State = EMop_State::Idle;
+		Mopping_Is_Done = true;
 		break;
 
 
@@ -197,6 +203,7 @@ void AsMop::Activate(bool cleaning)
 	{
 		Y_Pos = 172;
 		Mop_State = EMop_State::Ascending;
+		Mopping_Is_Done = false;
 
 		Lifting_Height = Get_Cylinders_Height() + Height;
 		Max_Y_Pos = AsConfig::Max_Y_Pos + Lifting_Height;
@@ -221,9 +228,17 @@ void AsMop::Clean_Area(HDC hdc)
 	AsTools::Rect(hdc, rect, AsConfig::BG_Color);
 }
 //------------------------------------------------------------------------------------------------------------
-EMop_State AsMop::Get_Mop_State()
+bool AsMop::Is_Mopping_Done()
 {
-	return Mop_State;
+	return Mopping_Is_Done;
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsMop::Is_Cleaning_Done()
+{
+	if (Mop_State == EMop_State::Clean_Done)
+		return true;
+	else
+		return false;
 }
 //------------------------------------------------------------------------------------------------------------
 int AsMop::Get_Cylinders_Height()

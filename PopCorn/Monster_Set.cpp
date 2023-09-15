@@ -92,7 +92,7 @@ void AsMonster_Set::Act()
 		AsConfig::Throw();
 	}
 
-	if (Monster_Set_State != EMonster_Set_State::Idle)
+	if (Monsters.size() != 0)
 	{
 		auto it = Monsters.begin();
 
@@ -173,6 +173,14 @@ void AsMonster_Set::Destroy_All()
 		monster->Destroy();
 
 	Monster_Set_State = EMonster_Set_State::Idle;
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsMonster_Set::Are_All_Destroyed()
+{
+	if (Monsters.size() == 0)
+		return true;
+	else
+		return false;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsMonster_Set::Set_Freeze_State(bool freeze)

@@ -34,7 +34,8 @@ public:
 
 	void Activate(bool cleaning);
 	void Clean_Area(HDC hdc);
-	EMop_State Get_Mop_State();
+	bool Is_Mopping_Done();
+	bool Is_Cleaning_Done();
 
 private:
 	int Get_Cylinders_Height();
@@ -42,6 +43,7 @@ private:
 	void Act_Lifting(bool lift_up);
 
 	EMop_State Mop_State;
+	bool Mopping_Is_Done;
 	int Y_Pos, Max_Y_Pos;
 	int Lifting_Height;
 	int Start_Tick;

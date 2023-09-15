@@ -96,7 +96,8 @@ private:
 enum class EMessage_Type: unsigned char
 {
 	Floor_Is_Over,
-	Unfreeze_Monsters
+	Unfreeze_Monsters,
+	Level_Done
 };
 //------------------------------------------------------------------------------------------------------------
 class AMessage

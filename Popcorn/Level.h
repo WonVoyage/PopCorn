@@ -39,6 +39,8 @@ public:
 	bool Get_Next_Falling_Letter(int &index, AFalling_Letter **falling_letter);
 	void Stop();
 	void Mop_Level(int next_level);
+	void Mop_Next_Level();
+	bool Can_Mop_Next_Level();
 	bool Is_Level_Mopping_Done();
 
 	static bool Has_Brick_At(int level_x, int level_y);
@@ -62,7 +64,8 @@ private:
 
 	RECT Level_Rect;
 	bool Need_To_Cancel_All;
-	int Next_Level;
+	int Next_Level_Number, Current_Level_Number;
+	int Available_Bricks_Count;
 
 	double Current_Brick_Left_X, Current_Brick_Right_X;
 	double Current_Brick_Top_Y, Current_Brick_Low_Y;
