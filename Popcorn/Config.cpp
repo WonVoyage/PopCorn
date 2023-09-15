@@ -88,6 +88,52 @@ HBRUSH AColor::Get_Brush() const
 
 
 
+// AColor_Fade
+//------------------------------------------------------------------------------------------------------------
+AColor_Fade::~AColor_Fade()
+{
+	for (auto *color: Fading_Colors)
+		delete color;
+
+	Fading_Colors.erase(Fading_Colors.begin(), Fading_Colors.end() );
+}
+//------------------------------------------------------------------------------------------------------------
+AColor_Fade::AColor_Fade(const AColor &color, int max_fade_step)
+{
+	int i;
+	AColor *curr_color;
+
+	for (i = 0; i < max_fade_step; i++)
+	{
+		curr_color = AsTools::Get_Fading_Color(color, i, max_fade_step);
+		Fading_Colors.push_back(curr_color);
+	}
+}
+//------------------------------------------------------------------------------------------------------------
+AColor_Fade::AColor_Fade(const AColor &origin_color, const AColor &base_color, int max_fade_step)
+{
+	int i;
+	AColor *curr_color;
+
+	for (i = 0; i < max_fade_step; i++)
+	{
+		curr_color = AsTools::Get_Fading_Color(origin_color, base_color, i, max_fade_step);
+		Fading_Colors.push_back(curr_color);
+	}
+}
+//------------------------------------------------------------------------------------------------------------
+AColor *AColor_Fade::Get_Color(int fade_step)
+{
+	if (fade_step < 0 || fade_step >= (int)Fading_Colors.size() )
+		AsConfig::Throw();
+
+	return Fading_Colors[fade_step];
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
 // AsConfig
 bool AsConfig::Level_Has_Floor = false;
 int AsConfig::Current_Timer_Tick = 0;
@@ -111,6 +157,8 @@ const AColor AsConfig::Monster_Comet_Tail(Monster_Dark_Red_Color, Global_Scale);
 const AColor AsConfig::BG_Outline_Color(BG_Color, Global_Scale * 2 / 3);
 const AColor AsConfig::Explosion_Red_Color(White_Color, Red_Color, 0);
 const AColor AsConfig::Explosion_Blue_Color(White_Color, Blue_Color, 0);
+const AColor AsConfig::Shadow_Color(BG_Color, Global_Scale);
+const AColor AsConfig::Highlight_Color(White_Color, Global_Scale);
 
 HWND AsConfig::Hwnd;
 
@@ -176,15 +224,23 @@ unsigned char AsTools::Get_Fading_Channel(unsigned char color, unsigned char bg_
 	return color - step * (color - bg_color) / (max_step - 1);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsTools::Get_Fading_Color(const AColor &origin_color, int step, AColor &result_color, int max_step)
+AColor *AsTools::Get_Fading_Color(const AColor &origin_color, int step, int max_step)
+{
+	return Get_Fading_Color(origin_color, AsConfig::BG_Color, step, max_step);
+}
+//------------------------------------------------------------------------------------------------------------
+AColor *AsTools::Get_Fading_Color(const AColor &origin_color, const AColor &base_color, int step, int max_step)
 {
 	unsigned char r, g, b;
+	AColor *result_color;
 
-	r = Get_Fading_Channel(origin_color.R, AsConfig::BG_Color.R, step, max_step);
-	g = Get_Fading_Channel(origin_color.G, AsConfig::BG_Color.G, step, max_step);
-	b = Get_Fading_Channel(origin_color.B, AsConfig::BG_Color.B, step, max_step);
+	r = Get_Fading_Channel(origin_color.R, base_color.R, step, max_step);
+	g = Get_Fading_Channel(origin_color.G, base_color.G, step, max_step);
+	b = Get_Fading_Channel(origin_color.B, base_color.B, step, max_step);
 
-	result_color.Set_As(r, g, b);
+	result_color = new AColor(r, g, b);
+
+	return result_color;
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsTools::Reflect_On_Circle(double next_x_pos, double next_y_pos, double circle_x, double circle_y, double circle_radius, ABall_Object *ball)

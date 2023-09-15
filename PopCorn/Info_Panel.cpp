@@ -7,8 +7,6 @@ RECT AsInfo_Panel::Data_Rect;
 //------------------------------------------------------------------------------------------------------------
 AsInfo_Panel::~AsInfo_Panel()
 {
-	delete Shadow_Color;
-	delete Highlight_Color;
 	delete Dark_Blue;
 	delete Dark_Red;
 
@@ -26,7 +24,7 @@ AsInfo_Panel::~AsInfo_Panel()
 }
 //------------------------------------------------------------------------------------------------------------
 AsInfo_Panel::AsInfo_Panel()
-: Extra_Lives_Count(AsConfig::Initial_Life_Count), Logo_Pop_Font(0), Logo_Corn_Font(0), Name_Font(0), Score_Font(0), Shadow_Color(0), Highlight_Color(0), Dark_Blue(0), Dark_Red(0),
+: Extra_Lives_Count(AsConfig::Initial_Life_Count), Logo_Pop_Font(0), Logo_Corn_Font(0), Name_Font(0), Score_Font(0), Dark_Blue(0), Dark_Red(0),
   Letter_P(EBrick_Type::Blue, ELetter_Type::P, 214 * AsConfig::Global_Scale + 1, 153 * AsConfig::Global_Scale),
   Letter_G(EBrick_Type::Blue, ELetter_Type::G, 256 * AsConfig::Global_Scale, 153 * AsConfig::Global_Scale),
   Letter_M(EBrick_Type::Blue, ELetter_Type::M, 297 * AsConfig::Global_Scale - 1, 153 * AsConfig::Global_Scale),
@@ -128,12 +126,12 @@ void AsInfo_Panel::Draw(HDC hdc, RECT &paint_area)
 		AsTools::Rect(hdc, Score_X + 2, Score_Y + 2, Score_Width - 4, Score_Height - 4, *Dark_Blue);
 
 		// 2.2. Áîðäþð
-		Highlight_Color->Select_Pen(hdc);
+		AsConfig::Highlight_Color.Select_Pen(hdc);
 		MoveToEx(hdc, (Score_X + 2) * scale, (Score_Y + Score_Height - 2) * scale, 0);
 		LineTo(hdc, (Score_X + 2) * scale, (Score_Y + 2) * scale);
 		LineTo(hdc, (Score_X + Score_Width - 2) * scale, (Score_Y + 2) * scale);
 
-		Shadow_Color->Select_Pen(hdc);
+		AsConfig::Shadow_Color.Select_Pen(hdc);
 		MoveToEx(hdc, (Score_X + Score_Width - 2) * scale, (Score_Y + 2) * scale, 0);
 		LineTo(hdc, (Score_X + Score_Width - 2) * scale, (Score_Y + Score_Height - 2) * scale);
 		LineTo(hdc, (Score_X + 2) * scale, (Score_Y + Score_Height - 2) * scale);
@@ -204,8 +202,6 @@ void AsInfo_Panel::Init()
 	log_font.lfHeight = -44;
 	Score_Font = CreateFontIndirect(&log_font);
 
-	Shadow_Color = new AColor(AsConfig::BG_Color, AsConfig::Global_Scale);
-	Highlight_Color = new AColor(AsConfig::White_Color, AsConfig::Global_Scale);
 	Dark_Blue = new AColor(0, 170, 170);
 	Dark_Red = new AColor(151, 0, 0);
 }

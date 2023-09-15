@@ -43,7 +43,7 @@ private:
 
 	int Extra_Lives_Count;
 	HFONT Logo_Pop_Font, Logo_Corn_Font, Name_Font, Score_Font;
-	AColor *Shadow_Color, *Highlight_Color, *Dark_Blue, *Dark_Red;
+	AColor *Dark_Blue, *Dark_Red;
 
 	AFalling_Letter Letter_P, Letter_G, Letter_M;
 

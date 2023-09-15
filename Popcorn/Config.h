@@ -28,6 +28,19 @@ private:
 	HBRUSH Brush;
 };
 //------------------------------------------------------------------------------------------------------------
+class AColor_Fade
+{
+public:
+	~AColor_Fade();
+	AColor_Fade(const AColor &color, int max_fade_step);
+	AColor_Fade(const AColor &origin_color, const AColor &base_color, int max_fade_step);
+
+	AColor *Get_Color(int fade_step);
+
+private:
+	std::vector<AColor *> Fading_Colors;
+};
+//------------------------------------------------------------------------------------------------------------
 class AsConfig
 {
 public:
@@ -40,6 +53,7 @@ public:
 	static const AColor Advertisement_Blue_Table, Advertisement_Red_Table;
 	static const AColor Monster_Dark_Red_Color, Monster_Cornea_Color, Monster_Iris_Color, Monster_Comet_Tail;
 	static const AColor BG_Outline_Color, Explosion_Red_Color, Explosion_Blue_Color;
+	static const AColor Shadow_Color, Highlight_Color;
 	static HWND Hwnd;
 
 	static const double D_Global_Scale;
@@ -91,7 +105,8 @@ public:
 	static void Ellipse(HDC hdc, RECT &rect, const AColor &color);
 	static void Invalidate_Rect(RECT &rect);
 	static unsigned char Get_Fading_Channel(unsigned char color, unsigned char bg_color, int step, int max_step);
-	static void Get_Fading_Color(const AColor &origin_color, int step, AColor &result_color, int max_step);
+	static AColor *Get_Fading_Color(const AColor &origin_color, int step, int max_step);
+	static AColor *Get_Fading_Color(const AColor &origin_color, const AColor &base_color, int step, int max_step);
 	static bool Reflect_On_Circle(double next_x_pos, double next_y_pos, double circle_x, double circle_y, double circle_radius, ABall_Object *ball);
 };
 //------------------------------------------------------------------------------------------------------------

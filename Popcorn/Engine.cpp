@@ -22,9 +22,6 @@ void AsEngine::Init_Engine(HWND hwnd)
 
 	AsConfig::Hwnd = hwnd;
 
-	AActive_Brick_Red_Blue::Setup_Colors();
-	AExplosive_Ball::Setup_Colors();
-
 	Level.Init();
 	Platform.Init(&Ball_Set, &Laser_Beam_Set);
 	Monster_Set.Init(&Border);
@@ -42,7 +39,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 
 	AsPlatform::Hit_Checker_List.Add_Hit_Checker(&Monster_Set);
 
-	Level.Set_Current_Level(ALevel_Data::Max_Level_Number);
+	Level.Set_Current_Level(8);
 
 	//Ball.Set_State(EBall_State::Normal, Platform.X_Pos + Platform.Width / 2);
 	//Platform.Set_State(EPS_Normal);
